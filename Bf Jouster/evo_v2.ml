@@ -27,15 +27,11 @@ let instructions = [|P ; M ; P ; M ; L ; R ; W ; Lp[]|]
 let instructions' = [|P ; M ; P ; M ; L ; R ; W|]
 
 
-let pop_size = 100
-let taux_mutation = 0.01
-let nb_enfants = 2 (* Le nombre d'enfants que deux parents créent *)
-let min_program_size = 10
-let max_program_size = 500
-
-
 
 (* FONCTIONS PRATIQUES *)
+
+let (+=) a b = (a := (!a + b))
+let (-=) a b = (a := (!a - b))
 
 let rand () = Random.float 1.0
 
@@ -144,8 +140,9 @@ let croise bot1 bot2 =
 
 (* FITNESS *)
 
-let bot_MickeyV4bis = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
-let bot_FastClearBot = ">>>>>>>>>" ^ ("[+++[-]]>" **^ 21)
+let bot_MickeyV4_bis     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
+let bot_CounterPunch_bis = ">------------>>>>>>><------------<++++++++++++<------------<++++++++++++<------------<++++++++++++>>>>>>>" ^ ("[-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]]>" **^ 21)
+let bot_FastClearBot     = ">>>>>>>>>" ^ ("[+++[-]]>" **^ 21)
 
 
 let score bot1 bot2 n pol =
@@ -162,21 +159,16 @@ let score bot1 bot2 n pol =
 
 (* ALGORITHME GÉNÉTIQUE SIMPLE *)
 
-(* let fitness_s bot =
-    let sbot = sob bot in
-    let pts = ref 0 in
-    for i = 10 to 30 do
-        pts := !pts + score sbot bot_MickeyV4bis i Inv ;
-        pts := !pts + score sbot bot_MickeyV4bis i Norm
-    done ; !pts / 42 *)
 
 let fitness_s bot =
-   (score (sob bot) bot_MickeyV4bis 30 Norm +
-    score (sob bot) bot_MickeyV4bis 21 Norm +
-    score (sob bot) bot_MickeyV4bis 10 Norm +
-    score (sob bot) bot_MickeyV4bis 25 Inv  +
-    score (sob bot) bot_MickeyV4bis 17 Inv  +
-    score (sob bot) bot_MickeyV4bis 13 Inv) / 6  
+   ((score (sob bot) bot_MickeyV4_bis 30 Norm) +
+    (score (sob bot) bot_MickeyV4_bis 27 Inv ) +
+    (score (sob bot) bot_MickeyV4_bis 26 Norm) +
+    (score (sob bot) bot_MickeyV4_bis 23 Inv ) +
+    (score (sob bot) bot_MickeyV4_bis 21 Norm) +
+    (score (sob bot) bot_MickeyV4_bis 13 Inv ) +
+    (score (sob bot) bot_MickeyV4_bis 10 Norm))/7
+
 
 let rec fitness_pop_s = function
     | [] -> []
@@ -206,44 +198,58 @@ let best_n_of_pop_s n pop =
 
 (* ÉVOLUTION *)
 
-(*  13 parents
-    78 enfants
-    20 random    *)
+(*  11 parents
+    55 enfants
+    14 random    *)
 
-let rec nextgen_s parents = 
+let rec nextgen_s parents taux_m = 
     let rec aux i j =
-        if j = 13 then [] else
-        if i = 13 then aux (j+1) (j+1) else
+        if j = 11 then [] else
+        if i = 11 then aux (j+1) (j+1) else
         begin
-            let enfant = mutate (croise (parents @- i) (parents @- j)) 0.1 in
+            let enfant = mutate (croise (parents @- i) (parents @- j)) taux_m in
             if enfant = [] then [L] :: (aux (i+1) j)
             else enfant :: (aux (i+1) j)
         end
-    in (aux 0 0) @ (pop_alea 20 (20,3))
+    in (aux 0 0) @ (pop_alea 14 (20,3))
 
 
-let evolution_s n =
+let evolution_s nb_gen taux_m =
     print_int (Random.int 10000) ;
     print_newline () ;
     let rec aux i gen = if i = 0 then hd (tri_s gen)
     else (
         print_string "Generation n°" ;
-        print_int (n - i) ;
+        print_int (nb_gen - i) ;
         print_string " (" ;
-        let parents = best_n_of_pop_s 13 gen in
+        let parents = best_n_of_pop_s 11 gen in
         let best = hd parents in
         print_int (fitness_s best) ;
         print_string ") : " ;
         print_string (sob best) ;
         print_newline () ;
-        (* ignore (battle_gui (sob (hd gen)) bot_MickeyV4bis 30 Norm 0.) ; *)
-        aux (i-1) (nextgen_s parents)
-    ) in let result = sob (aux n (pop_alea 100 (20,3))) in
+        aux (i-1) (nextgen_s parents taux_m)
+    ) in let result = sob (aux nb_gen (pop_alea 100 (20,3))) in
     print_newline () ;
     print_string result ;
+    print_string "\n\nMickeyV4 :\n" ;
+    print_int (result *>> bot_MickeyV4_bis) ;
+    print_string "\n\nCounterPunch :\n" ;
+    print_int (result *>> bot_CounterPunch_bis) ;
+    print_newline ()
+
+
+let evolution_s_bis nb_gen taux_m =
     print_newline () ;
-    battle_gui result bot_MickeyV4bis 30 Norm 0.01 ;
-    result *>> bot_MickeyV4bis
+    let rec aux i gen =
+        if i = 0 then hd (tri_s gen)
+        else begin
+            let parents = best_n_of_pop_s 11 gen in
+            aux (i-1) (nextgen_s parents taux_m)
+        end
+    in let result = sob (aux nb_gen (pop_alea 100 (20,3))) in
+       print_int (result *> bot_MickeyV4_bis) ;
+       print_string ("  ->  " ^ result)
 
 
 (* DEBUG *)
