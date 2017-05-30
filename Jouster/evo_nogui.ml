@@ -245,9 +245,7 @@ let evolution_s nb_gen taux_m =
         print_newline () ;
         print_string ("Résultat :  " ^ result) ;
         print_string "\n\nBot objectif :\n----------\n" ;
-        print_int (result *>> bot_objectif) ;
-        print_newline () ;
-
+        print_int (result *>> bot_objectif)
 
 let evolution_s_bis nb_gen taux_m =
     print_newline () ;
@@ -266,5 +264,5 @@ let evolution_s_bis nb_gen taux_m =
 
 let evolve () =
     for i = 0 to 20 do
-        evolution_s 200 0.2
+        evolution_s 200 0.2 ;
     done
