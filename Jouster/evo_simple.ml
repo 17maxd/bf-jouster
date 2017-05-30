@@ -10,7 +10,7 @@ and instr = | P | M | L | R | W
 
 type polarite = Norm | Inv
 
-type mutation = Insert | Delete | Switch
+type mutation = Insert | Delete | Permut
 
 type fin_combat = Timeout | Capture | Sortie
 
@@ -20,11 +20,10 @@ type resultat = gagnant * fin_combat * int * int
 
 
 
-
 (* VARIABLES GLOBALES *)
 
 let instructions = [|P ; M ; P ; M ; L ; R ; W ; Lp[]|]
-let instructions' = [|P ; M ; P ; M ; L ; R ; W|]
+let instructions_std = [|P ; M ; P ; M ; L ; R ; W|]
 
 
 
@@ -54,6 +53,7 @@ let rec string_of_bot = function
     | W :: q -> "." ^ string_of_bot q
     | Lp bot :: q -> "[" ^ (string_of_bot bot) ^ "]" ^ string_of_bot q
 
+
 let sob bot = string_of_bot bot
 
 
@@ -78,7 +78,7 @@ let longueur bot =
 (* GÉNÉRATION ALÉATOIRE *)
 
 let instr_alea () = instructions.(Random.int 8)
-let instr_alea' () = instructions'.(Random.int 7)
+let instr_alea_std () = instructions_std.(Random.int 7)
 
 let rec bot_alea s d =
     let rec aux i =
@@ -98,7 +98,7 @@ let rec pop_alea size (s, d) = match size with
 
 (* MUTATIONS *)
 
-let mutation_alea () = [|Insert ; Delete ; Switch|].(Random.int 3)
+let mutation_alea () = [|Insert ; Delete ; Permut|].(Random.int 3)
 
 let rec mutate bot taux =
     let rec aux = function
@@ -108,9 +108,9 @@ let rec mutate bot taux =
             if rand () > taux
             then t::(aux (t'::q)) else
             match mutation_alea () with
-                | Insert -> t :: (instr_alea' ()) :: (aux (t'::q))
+                | Insert -> t :: (instr_alea_std ()) :: (aux (t'::q))
                 | Delete -> aux (t'::q)
-                | Switch -> t'::t::(aux q)
+                | Permut -> t'::t::(aux q)
             )
         | x -> x
     in aux bot
@@ -140,34 +140,42 @@ let croise bot1 bot2 =
 
 (* FITNESS *)
 
-let bot_MickeyV4_bis     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
-let bot_CounterPunch_bis = ">------------>>>>>>><------------<++++++++++++<------------<++++++++++++<------------<++++++++++++>>>>>>>" ^ ("[-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]]>" **^ 21)
-let bot_FastClearBot     = ">>>>>>>>>" ^ ("[+++[-]]>" **^ 21)
+let bot_MickeyV4_m     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
+let bot_CounterPunch_m = ">------------>>>>>>><------------<++++++++++++<------------<++++++++++++<------------<++++++++++++>>>>>>>" ^ ("[-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]]>" **^ 21)
+let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>------------------>++++++++++++++++++" ^ (">[++++++++++++++++++[-][-[+]]][++++++++++++++++++[-][-[+]]]" **^ 21)
 
 
-let score bot1 bot2 n pol =
-    match battle bot1 bot2 n pol with
+let score bot1 bot2 taille pol =
+    match battle bot1 bot2 taille pol with
     | (Nul, _, _, _) -> 0
-    | (Gauche, Timeout, _, _) -> 3
-    | (Droite, Timeout, _, _) -> -3
+    | (Gauche, Timeout, _, _) -> 1
+    | (Droite, Timeout, _, _) -> -1
     | (Gauche, Capture, d, n) -> d/10 + 8 - n/200
     | (Droite, Capture, d, n) -> d/10 - 8 + n/200
     | (Gauche, Sortie,  _, _) -> 20
     | (Droite, Sortie,  _, _) -> -20
 
 
-
-(* ALGORITHME GÉNÉTIQUE SIMPLE *)
-
+let bot_objectif = bot_MickeyV4_m
 
 let fitness_s bot =
-   ((score (sob bot) bot_MickeyV4_bis 30 Norm) +
-    (score (sob bot) bot_MickeyV4_bis 27 Inv ) +
-    (score (sob bot) bot_MickeyV4_bis 26 Norm) +
-    (score (sob bot) bot_MickeyV4_bis 23 Inv ) +
-    (score (sob bot) bot_MickeyV4_bis 21 Norm) +
-    (score (sob bot) bot_MickeyV4_bis 13 Inv ) +
-    (score (sob bot) bot_MickeyV4_bis 10 Norm))/7
+   ((score (sob bot) bot_objectif 11 Norm) +
+    (score (sob bot) bot_objectif 21 Norm) +
+    (score (sob bot) bot_objectif 24 Norm) +
+    (score (sob bot) bot_objectif 29 Norm) +
+    (score (sob bot) bot_objectif 30 Norm) +
+    (score (sob bot) bot_objectif 13 Inv ) +
+    (score (sob bot) bot_objectif 17 Inv ) +
+    (score (sob bot) bot_objectif 20 Inv ) +
+    (score (sob bot) bot_objectif 25 Inv ) +
+    (score (sob bot) bot_objectif 29 Inv )) / 10
+
+
+
+(* let fitness_s bot = score (sob bot) bot_MickeyV4_m 30 Norm) *)
+
+
+(* ALGORITHME GÉNÉTIQUE SIMPLE *)
 
 
 let rec fitness_pop_s = function
@@ -198,9 +206,11 @@ let best_n_of_pop_s n pop =
 
 (* ÉVOLUTION *)
 
-(*  11 parents
-    55 enfants
-    14 random    *)
+(*  80 individus :
+    --------------
+    - 11 parents
+    - 55 enfants
+    - 14 random    *)
 
 let rec nextgen_s parents taux_m = 
     let rec aux i j =
@@ -211,48 +221,53 @@ let rec nextgen_s parents taux_m =
             if enfant = [] then [L] :: (aux (i+1) j)
             else enfant :: (aux (i+1) j)
         end
-    in (aux 0 0) @ (pop_alea 14 (20,3))
+    in (aux 0 0) @ (pop_alea 20 (20,3))
 
 
 let evolution_s nb_gen taux_m =
     print_int (Random.int 10000) ;
     print_newline () ;
-    let rec aux i gen = if i = 0 then hd (tri_s gen)
-    else (
-        print_string "Generation n°" ;
-        print_int (nb_gen - i) ;
-        print_string " (" ;
-        let parents = best_n_of_pop_s 11 gen in
-        let best = hd parents in
-        print_int (fitness_s best) ;
-        print_string ") : " ;
-        print_string (sob best) ;
+    let rec aux i gen =
+        if i <= 0 then hd (tri_s gen)
+        else begin
+            print_string "Generation n°" ;
+            print_int (nb_gen - i) ;
+            print_string " (f:" ;
+            let parents = best_n_of_pop_s 11 gen in
+            let best = hd parents in
+            print_int (fitness_s best) ;
+            print_string ") : " ;
+            print_string (sob best) ;
+            print_newline () ;
+            aux (i-1) (nextgen_s parents taux_m)
+        end
+    in let result = sob (aux nb_gen (pop_alea 100 (25, 3))) in
         print_newline () ;
-        aux (i-1) (nextgen_s parents taux_m)
-    ) in let result = sob (aux nb_gen (pop_alea 100 (20,3))) in
-    print_newline () ;
-    print_string result ;
-    print_string "\n\nMickeyV4 :\n" ;
-    print_int (result *>> bot_MickeyV4_bis) ;
-    print_string "\n\nCounterPunch :\n" ;
-    print_int (result *>> bot_CounterPunch_bis) ;
-    print_newline ()
+        print_string ("Résultat :  " ^ result) ;
+        print_string "\n\nBot objectif :\n----------\n" ;
+        print_int (result *>> bot_objectif) ;
+        print_newline () ;
+        battle_gui result bot_objectif 30 Norm 0.001
 
 
 let evolution_s_bis nb_gen taux_m =
     print_newline () ;
     let rec aux i gen =
-        if i = 0 then hd (tri_s gen)
+        if i <= 0 then hd (tri_s gen)
         else begin
             let parents = best_n_of_pop_s 11 gen in
             aux (i-1) (nextgen_s parents taux_m)
         end
     in let result = sob (aux nb_gen (pop_alea 100 (20,3))) in
-       print_int (result *> bot_MickeyV4_bis) ;
-       print_string ("  ->  " ^ result)
+        print_int (result *> bot_objectif) ;
+        print_string ("  ->  " ^ result)
 
 
 (* DEBUG *)
 
 let testbot1 = [W;R;P;M;P;P;L;Lp[P;W;Lp[M];R];M;R;P;M;R;P;M;Lp[W;Lp[L;Lp[L]]];P]
 
+let evolue () =
+    for i = 0 to 20 do
+        evolution_s 200 0.2
+    done

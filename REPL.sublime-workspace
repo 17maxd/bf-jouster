@@ -1,0 +1,357 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"bot",
+				"bot_MickeyV4_m"
+			],
+			[
+				"bigger",
+				"bot_Bigger_m"
+			],
+			[
+				"battle",
+				"battle_gui"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "        OCaml version 4.04.1\n\n# ",
+			"settings":
+			{
+				"buffer_size": 32,
+				"line_ending": "Unix",
+				"name": "*REPL* [ocaml]",
+				"scratch": true
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 167.0,
+		"last_filter": "save",
+		"selected_items":
+		[
+			[
+				"save",
+				"Project: Save As"
+			],
+			[
+				"ocaml",
+				"SublimeREPL: OCaml"
+			],
+			[
+				"ocam",
+				"SublimeREPL: OCaml"
+			],
+			[
+				"pi",
+				"Package Control: Install Package"
+			],
+			[
+				"coq",
+				"SublimeCoq: Run"
+			],
+			[
+				"pr",
+				"Package Control: Remove Package"
+			],
+			[
+				"markmo",
+				"Markmon launch"
+			],
+			[
+				"preview",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"pyth",
+				"SublimeREPL: Python"
+			],
+			[
+				"repl ocaml",
+				"SublimeREPL: OCaml"
+			],
+			[
+				"repl pyh",
+				"SublimeREPL: Python"
+			],
+			[
+				"packa",
+				"Install Package Control"
+			]
+		],
+		"width": 458.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/max/Dropbox/Prépa/TIPE/bf-jouster/Jouster/trained_bots.ml",
+		"/home/max/Bureau/tests.v",
+		"/home/max/.config/sublime-text-3/Packages/User/Sublime-Coq.sublime-settings",
+		"/home/max/.config/sublime-text-3/Packages/Sublime-Coq/Sublime-Coq.sublime-settings",
+		"/home/max/Dropbox/Prépa/TIPE/bf-jouster/Jouster/test.txt",
+		"/home/max/Dropbox/Default - Math.html",
+		"/home/max/Dropbox/Applications/Editorial/math.md",
+		"/home/max/Dropbox/Applications/Editorial/Riemann.md",
+		"/home/max/.cache/.fr-faDxLp/default.css",
+		"/home/max/.cache/.fr-joIdGG/default.css",
+		"/home/max/Dropbox/Applications/Pythonista-Synchronator/Riemann/analyse_c.py",
+		"/home/max/Dropbox/Applications/Editorial/reinstallation systeme.taskpaper",
+		"/home/max/Téléchargements/Pirates of the Caribbean - Curse of the Black Pearl (2003)/Pirates.of.the.Caribbean.Curse.of.the.Black.Pearl.srt"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"bot_FastClearBot",
+			"bis",
+			"bot_FastClearBot",
+			"sz",
+			"size",
+			"= ",
+			"_E",
+			"e",
+			"E",
+			"G",
+			"score_battle",
+			"jump",
+			"tl",
+			"prf",
+			"jump",
+			"pol",
+			"size",
+			"i",
+			"profondeur",
+			"dpt",
+			"c",
+			"c+",
+			" c ",
+			"reverse_pol_bot",
+			"bot",
+			"reverse_bot",
+			"jump",
+			"instr_alea'",
+			"instructions'",
+			"Switch",
+			"*@",
+			"hd"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 32,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								32,
+								32
+							]
+						],
+						"settings":
+						{
+							"WordCount":
+							{
+								"changes": 3,
+								"count": 2,
+								"modified": false,
+								"selection": false,
+								"status": -1,
+								"syntax": "plain text"
+							},
+							"auto_complete": true,
+							"auto_indent": false,
+							"default_dir": "/home/max/Dropbox/Prépa/TIPE/bf-jouster",
+							"detect_indentation": false,
+							"gutter": false,
+							"history_arrows": true,
+							"indent_subsequent_lines": false,
+							"line_numbers": false,
+							"repl": true,
+							"repl_external_id": "ocaml",
+							"repl_id": "59964c2a98c4430991e245fa6a3ffaec",
+							"repl_restart_args":
+							{
+								"autocomplete_server": false,
+								"cmd":
+								{
+									"linux":
+									[
+										"ocaml"
+									],
+									"osx":
+									[
+										"ocaml"
+									],
+									"windows":
+									[
+										"ocaml.exe"
+									]
+								},
+								"cmd_postfix": ";;\n",
+								"cwd": "$file_path",
+								"encoding": "utf8",
+								"external_id": "ocaml",
+								"soft_quit": "\n#quit;;\n",
+								"syntax": "Packages/SublimeREPL/config/OCaml/OCaml (toplevel).tmLanguage",
+								"type": "subprocess"
+							},
+							"repl_sublime2": false,
+							"smart_indent": false,
+							"spell_check": false,
+							"syntax": "Packages/SublimeREPL/config/OCaml/OCaml (toplevel).tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": false,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "REPL.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": false,
+	"side_bar_visible": false,
+	"side_bar_width": 187.0,
+	"status_bar_visible": false,
+	"template_settings":
+	{
+	}
+}
