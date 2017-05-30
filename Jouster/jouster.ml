@@ -1,7 +1,7 @@
 (*
     File : jouster.ml
     Version : 3.0
-    Author : max
+    Author : Max D3
 *)
 
 
@@ -12,9 +12,6 @@ type polarite = Norm | Inv
 type fin_combat = Timeout | Capture | Sortie
 
 type gagnant = Gauche | Nul | Droite
-
-(* resultat : (gagnant, issue, delta_drapeaux, nb_cycles) *)
-type resultat = gagnant * fin_combat * int * int
 
 
 
@@ -121,7 +118,7 @@ let score_battle bot1 bot2 n pol = match battle bot1 bot2 n pol with
     | (Nul,_,_,_) -> 0
 
 
-(** joue tous les bombats entre deux bots *)
+(** joue tous les combats entre deux bots *)
 let ( *>> ) bot1 bot2 =
     let pts = ref 0 in
     print_string "NORMAL :" ;
@@ -138,8 +135,10 @@ let ( *>> ) bot1 bot2 =
         print_string (" " ^ if s < 0 then "" else " ") ;
         print_int s
     done ;
-    print_string "\n" ;
-    !pts
+    print_newline () ;
+    print_string "Score : " ;
+    print_int !pts ;
+    print_newline ()
 
 
 let ( *> ) bot1 bot2 =
