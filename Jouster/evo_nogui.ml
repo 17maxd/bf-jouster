@@ -156,7 +156,7 @@ let score bot1 bot2 taille pol =
     | (Droite, Sortie,  _, _) -> -20
 
 
-let bot_objectif = bot_MickeyV4_m
+let bot_objectif = bot_CounterPunch_m
 
 let fitness_s bot =
    ((score (sob bot) bot_objectif 11 Norm) +
