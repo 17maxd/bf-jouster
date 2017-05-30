@@ -261,6 +261,12 @@ let evolution_s_quiet nb_gen taux =
     p_n () ; p_n () ;
     resultat *>> bot_objectif
 
+
+let evolve () =
+    for i = 0 to 20 do
+        evolution_s_bis 200 0.1 ;
+        p_n ()
+    done
     
     
 
@@ -318,10 +324,5 @@ let evolution_s_bis nb_gen taux_m =
 
 
 (* DEBUG *)
-
-let evolve () =
-    for i = 0 to 20 do
-        evolution_s_bis 200 0.2 ;
-    done
 
 *)
