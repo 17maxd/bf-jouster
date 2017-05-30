@@ -156,7 +156,7 @@ let score bot1 bot2 taille pol =
     | (Droite, Sortie,  _, _) -> -20
 
 
-let bot_objectif = bot_CounterPunch_m
+let bot_objectif = bot_Bigger_m
 
 let fitness_s bot =
    ((score (sob bot) bot_objectif 11 Norm) +
@@ -225,6 +225,7 @@ let rec nextgen_s parents taux_m =
 
 
 let evolution_s nb_gen taux_m =
+    print_newline () ;
     print_int (Random.int 10000) ;
     print_newline () ;
     let rec aux i gen =
@@ -249,6 +250,7 @@ let evolution_s nb_gen taux_m =
 
 
 let evolution_s_bis nb_gen taux_m =
+    print_newline () ;
     print_int (Random.int 10000) ;
     print_newline () ;
     let rec aux i gen =
