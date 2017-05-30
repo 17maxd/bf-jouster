@@ -254,7 +254,6 @@ let evolution_s_bis nb_gen taux_m =
         if i <= 0 then hd (tri_s gen)
         else
             let parents = best_n_of_pop_s 11 gen in
-            let best = hd parents in
             aux (i-1) (nextgen_s parents taux_m)
     in let result = sob (aux nb_gen (pop_alea 100 (25, 3))) in
         print_newline () ;
