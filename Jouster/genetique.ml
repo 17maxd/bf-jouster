@@ -86,7 +86,7 @@ let score bot1 bot2 taille pol =
     | (Droite, Sortie,  _, _) -> -20
 
 
-(* let fitness bot =
+let fitness bot =
     let bot_s = sob bot in
    ((score bot_s bot_objectif 11 Norm) +
     (score bot_s bot_objectif 21 Norm) +
@@ -98,9 +98,6 @@ let score bot1 bot2 taille pol =
     (score bot_s bot_objectif 20 Inv ) +
     (score bot_s bot_objectif 25 Inv ) +
     (score bot_s bot_objectif 29 Inv )) / 10
- *)
-
-let fitness bot = score (sob bot) bot_objectif 30 Norm
 
 
 
@@ -231,15 +228,32 @@ let gen_suivante pop taux =
     parents @ (muter_pop (augmente parents) taux) @ (pop_alea 9)
 
 
-
 let evolution_s nb_gen taux =
     p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
     let pop = ref (pop_alea 100) in
     for i = 0 to nb_gen do
+        p_s "Generation n°" ; p_i i ; p_s " (f:" ;
+        let best = hd (meilleurs 1 !pop) in
+        p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n () ;
+        pop := gen_suivante !pop taux
+    done ;
+    let resultat = sob (snd (hd (meilleurs 1 !pop))) in
+    p_n () ;
+    p_s ("Résultat :  " ^ resultat) ;
+    p_n () ; p_n () ;
+    resultat *>> bot_objectif
+
+    
+let evolution_s_quiet nb_gen taux =
+    p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
+    let pop = ref (pop_alea 100) in
+    for i = 0 to nb_gen do
+        if i mod 20 = 0 then begin
             p_s "Generation n°" ; p_i i ; p_s " (f:" ;
             let best = hd (meilleurs 1 !pop) in
-            p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n () ;
-            pop := gen_suivante !pop taux
+            p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n ()
+        end ;
+        pop := gen_suivante !pop taux
     done ;
     let resultat = sob (snd (hd (meilleurs 1 !pop))) in
     p_n () ;
