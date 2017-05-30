@@ -264,9 +264,7 @@ let evolution_s_bis nb_gen taux_m =
 
 (* DEBUG *)
 
-let testbot1 = [W;R;P;M;P;P;L;Lp[P;W;Lp[M];R];M;R;P;M;R;P;M;Lp[W;Lp[L;Lp[L]]];P]
-
-let evolue () =
+let evolve () =
     for i = 0 to 20 do
         evolution_s 200 0.2
     done
