@@ -155,6 +155,8 @@ let ( *> ) bot1 bot2 =
 
 (** Speedtest sur 420 combats de tous types *)
 let speedtest bot1 bot2 =
+    Printf.printf "\nBenchmark..." ;
+    print_newline() ;
     let t = Sys.time() in
     for i = 1 to 20 do
         ignore (bot1 *> bot2)
