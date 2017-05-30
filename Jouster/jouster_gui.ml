@@ -188,7 +188,7 @@ let battle_gui bot1 bot2 taille pol secs =
     let bot2 = reverse_bot (if pol = Inv then reverse_pol_bot bot2 else bot2) in
     let mem = [|128|] @@ ([|0|] *@ (taille - 2)) @@ [|128|] in
     let len1, len2 = String.length bot1, String.length bot2 in
-    traceInstant mem 0 (taille - 1) ; pause 2.0 ;
+    traceInstant mem 0 (taille - 1) ; pause 0.5 ;
     let exec bot p i l = match bot.[i] with
         | '>' -> (p + 1, i + 1, l)
         | '<' -> (p - 1, i + 1, l)
@@ -229,7 +229,9 @@ let battle_gui bot1 bot2 taille pol secs =
 
 let all_battles_gui bot1 bot2 secs =
     for i = 10 to 30 do
+        pause 0.5 ;
         battle_gui bot1 bot2 i Norm secs ;
+        pause 0.5 ;
         battle_gui bot1 bot2 i Inv secs ;
     done
 

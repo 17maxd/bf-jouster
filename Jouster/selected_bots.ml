@@ -10,13 +10,13 @@ let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>-------
 
 let bot_G1             = "+++>[>-[-]>>]+"
 let bot_G1_bis         = ">[.+<>+--+>+[+[-]>]>]>>>++++"
-let bot_G2             = "."
-let bot_G3             = "."
+let bot_G2             = "+>-[->[-..->[+]<]-]--[>-..+<.<++-[[[-]-[+]]-]]"
+let bot_G3             = ""
 
-let bot_E1             = "."
-let bot_E2             = "."
-let bot_E3             = "."
+let bot_E1             = ""
+let bot_E2             = ""
+let bot_E3             = ""
 
-let bot_P1             = "."
-let bot_P2             = "."
-let bot_P3             = "."
+let bot_P1             = ""
+let bot_P2             = ""
+let bot_P3             = ""
