@@ -264,65 +264,6 @@ let evolution_s_quiet nb_gen taux =
 
 let evolve () =
     for i = 0 to 20 do
-        evolution_s_bis 200 0.1 ;
+        evolution_s_quiet 200 0.1 ;
         p_n ()
     done
-    
-    
-
-(*
-let evolution_s nb_gen taux_m =
-    print_newline () ;
-    print_int (Random.int 10000) ;
-    print_newline () ;
-    let rec aux i gen =
-        if i <= 0 then hd (tri_s gen)
-        else begin
-            print_string "Generation n°" ;
-            print_int (nb_gen - i) ;
-            print_string " (f:" ;
-            let parents = best_n_of_pop_s 11 gen in
-            let best = hd parents in
-            print_int (fitness_s best) ;
-            print_string ") : " ;
-            print_string (sob best) ;
-            print_newline () ;
-            aux (i-1) (nextgen_s parents taux_m)
-        end
-    in let result = sob (aux nb_gen (pop_alea 100 (25, 3))) in
-        print_newline () ;
-        print_string ("Résultat :  " ^ result) ;
-        print_string "\n\nBot objectif :\n----------\n" ;
-        print_int (result *>> bot_objectif)
-
-
-let evolution_s_bis nb_gen taux_m =
-    print_newline () ;
-    print_int (Random.int 10000) ;
-    print_newline () ;
-    let rec aux i gen =
-        if i <= 0 then hd (tri_s gen)
-        else begin
-            if i mod 20 = 0 then begin
-            print_string "Generation n°" ;
-            print_int (nb_gen - i) ;
-            print_string " (f:" end ;
-            let parents = best_n_of_pop_s 11 gen in
-            if i mod 20 = 0 then begin
-            let best = hd parents in
-            print_int (fitness_s best) ;
-            print_string ") : " ;
-            print_string (sob best) ;
-            print_newline () end ;
-            aux (i-1) (nextgen_s parents taux_m)
-        end
-    in let result = sob (aux nb_gen (pop_alea 100 (25, 3))) in
-        print_newline () ;
-        print_string ("Résultat :  " ^ result) ;
-        print_string "\n\nBot objectif :\n----------\n" ;
-        print_int (result *>> bot_objectif)
-
-
-(* DEBUG *)
-
-*)
