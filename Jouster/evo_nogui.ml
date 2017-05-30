@@ -278,5 +278,5 @@ let evolution_s_bis nb_gen taux_m =
 
 let evolve () =
     for i = 0 to 20 do
-        evolution_s 200 0.2 ;
+        evolution_s_bis 200 0.2 ;
     done
