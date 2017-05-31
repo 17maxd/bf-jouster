@@ -1,8 +1,0 @@
-        OCaml version 4.02.3
-
-
-   -- EVOLUTION BENCHMARK --
-
-Taux de mutation : 0.01
-
--7  ->  .[>+[-[-]-]-].--[<<-]><<--.-

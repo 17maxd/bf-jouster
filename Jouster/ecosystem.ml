@@ -1,8 +1,9 @@
 (*
-    File : genetique.ml
-    Version : 2.0
+    File : ecosysteme.ml
+    Version : 1.0
     Author : Max D3
 *)
+
 
 
 (* TYPAGE *)
@@ -18,6 +19,11 @@ type mutation = Insert | Delete | Permut
 type fin_combat = Timeout | Capture | Sortie
 
 type gagnant = Gauche | Nul | Droite
+
+type individu = { mutable x : int ;
+                  mutable y : int ;
+                  mutable vie : int ;
+                  mutable code : bot }
 
 
 
@@ -37,6 +43,7 @@ let rec ( **^) str n =
 let p_i i = print_int i
 let p_s s = print_string s
 let p_n () = print_newline ()
+
 
 
 (* MANIPULATIONS DE BOTS *)
@@ -66,7 +73,7 @@ let rec longueur bot =
 
 
 
-(* 1. FITNESS *)
+(* 1. DURÉE DE VIE *)
 
 let bot_MickeyV4_m     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
 let bot_CounterPunch_m = ">------------>>>>>>><------------<++++++++++++<------------<++++++++++++<------------<++++++++++++>>>>>>>" ^ ("[-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]]>" **^ 21)
@@ -100,6 +107,9 @@ let fitness bot =
     (score bot_s bot_objectif 29 Inv )) / 10
 
 
+let duree_vie bot = let x = (fitness bot + 20) in x*x
+
+
 
 (* 2. GÉNÉRATION ALÉATOIRE *)
 
@@ -122,9 +132,9 @@ let rec bot_alea len p_max =
     in aux (1 + Random.int len)
 
 
-(** un individu est un tuple (fit, bot) *)
 let rec ind_alea len p_max =
-    let bot = bot_alea len p_max in (fitness bot, bot)
+    let bot = bot_alea len p_max in
+    {x = Random.int 99; y = Random.int 99; vie = duree_vie bot; code = bot}
 
 
 let rec pop_alea taille = match taille with
@@ -154,8 +164,8 @@ let rec muter_bot bot taux =
 
 
 let muter ind taux =
-    let mutant = muter_bot (snd ind) taux in
-    (fitness mutant, mutant)
+    let mutant = muter_bot ind.code taux in
+    {x = ind.x; y = ind.y; vie =  duree_vie mutant; code = mutant}
 
 
 let rec muter_pop pop taux = match pop with
@@ -164,7 +174,24 @@ let rec muter_pop pop taux = match pop with
 
 
 
-(* 4. CROISEMENTS *)
+(* 4. DÉPLACEMENTS *)
+
+let deplace ind =
+    if ind.x = 0  then ind.x <- ind.x + Random.int 3 else
+    if ind.x = 99 then ind.x <- ind.x - Random.int 3 else
+    ind.x <- ind.x + (Random.int 7) - 3 ;
+    if ind.y = 0  then ind.y <- ind.y + Random.int 3 else
+    if ind.y = 99 then ind.y <- ind.y - Random.int 3 else
+    ind.y <- ind.y + (Random.int 7) - 3
+
+
+let rec deplace_pop = function
+    | t::q -> (deplace t ; deplace_pop q)
+    | [] -> ()
+
+
+
+(* 5. CROISEMENTS *)
 
 let rec n_derniers n liste =
     if n >= List.length liste then liste else
@@ -188,8 +215,8 @@ let croise_bot bot1 bot2 =
 
 
 let croise ind1 ind2 =
-    let enfant = croise_bot (snd ind1) (snd ind2) in
-    (fitness enfant, enfant)
+    let enfant = croise_bot ind1.code ind2.code in
+    {x = ind1.x; y = ind1.y; vie = duree_vie enfant; code = enfant}
 
 
 
@@ -243,7 +270,9 @@ let evolution_s nb_gen taux =
     p_n () ; p_n () ;
     resultat *>> bot_objectif
 
-    
+
+
+(** affiche seulement une génération sur 20 *)    
 let evolution_s_quiet nb_gen taux =
     p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
     let pop = ref (pop_alea 100) in
