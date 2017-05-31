@@ -1,7 +1,0 @@
-Tournois Brainfuck
-==================
-
-
-I. Règles
----------
-
