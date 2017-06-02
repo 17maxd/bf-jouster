@@ -3,12 +3,14 @@
 
 This project aims to obtain an almost unbeatable robot at Bf Joust (see [Esolang - BF Joust](https://esolangs.org/wiki/BF_Joust)).
 
+*Note : This Bf Joust implementation differs slightly from the original one: when a bf program reaches its end, it starts over again.*
+
 For this we will implement a standard genetic algorithm, then two variations: an ecosystem simulation and a parallel evolution strategy.
 
-Those can be loaded in `utop`  by launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
+Those can be directly loaded in `utop`  by launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
 
 
-## 0. Jousting (`jouster.ml` and `jouster_gui.ml`)
+## 0. Bf Jousting (`jouster.ml` and `jouster_gui.ml`)
 
 (Game descrion from [codegolf](https://codegolf.stackexchange.com/questions/36645/brainfedbotsforbattling-a-brainf-tournament)).
 
@@ -83,7 +85,7 @@ The function `joust_gui` displays an animation of a joust between two bots. The 
 
 
 
-## 1. Standard genetic algorithm
+## 1. Standard genetic algorithm (`genetic.ml`)
 
 (yet to come...)
 
@@ -125,3 +127,7 @@ The following rules determine the simulation:
 - After a fixed number of years, all breeding are stopped until one bot only is alive This bot is the result of the simulation. (To force the meeting of the last alive bots, the grid is progressively reduced to a single point).
 
 Two special rules can be temporarily be applied in specific cases: if the population gets too low (below 80), an encounter ends up in a fight. If the population gets too high (over 120), a meeting is necessarily a breeding.
+
+## 3. Parallel evolution (`parallel.ml`)
+
+(yet to come...)
