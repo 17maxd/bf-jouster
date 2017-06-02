@@ -5,12 +5,12 @@ This project aims to obtain an almost unbeatable robot at Bf Joust (see [Esolang
 
 For this we will implement a standard genetic algorithm, then two variations: an ecosystem simulation and a parallel evolution strategy.
 
-Those can be loaded in `utop` by, from the `Jouster/` folder, launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
+Those can be loaded in `utop`  by launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
 
 
 ## 0. Jousting (`jouster.ml` and `jouster_gui.ml`)
 
-(From [codegolf](https://codegolf.stackexchange.com/questions/36645/brainfedbotsforbattling-a-brainf-tournament)).
+(Game descrion from [codegolf](https://codegolf.stackexchange.com/questions/36645/brainfedbotsforbattling-a-brainf-tournament)).
 
 ### Description of a joust
 
