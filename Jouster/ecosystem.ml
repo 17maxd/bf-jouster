@@ -6,7 +6,7 @@
 
 
 
-(* TYPAGE *)
+(* TYPES *)
 
 type bot = instr list
 and instr = | P | M | L | R | W
@@ -16,18 +16,18 @@ type polarite = Norm | Inv
 
 type mutation = Insert | Delete | Permut
 
-type fin_combat = Timeout | Capture | Sortie
+type fin_combat = Timeout | Capture | Exit
 
-type gagnant = Gauche | Nul | Droite
+type gagnant = Left | Tie | Right
 
-type individu = { mutable x : int ;
-                  mutable y : int ;
-                  mutable vie : int ;
-                  mutable code : bot }
+type individual = { mutable x : int ;
+                    mutable y : int ;
+                    mutable vie : int ;
+                    mutable code : bot }
 
 
 
-(* FONCTIONS STANDARD *)
+(** BASIC FUNCTIONS AND SHORTCUTS **)
 
 let (+=) a b = (a := (!a + b))
 let (-=) a b = (a := (!a - b))
@@ -46,7 +46,7 @@ let p_n () = print_newline ()
 
 
 
-(* MANIPULATIONS DE BOTS *)
+(* ABOUT:ROBOTS *)
 
 let rec string_of_bot = function
     | [] -> ""
@@ -60,51 +60,54 @@ let rec string_of_bot = function
 let sob bot = string_of_bot bot
 
 
-let rec longueur bot =
+(** calculates the length of the string representation of a bot *)
+let rec length bot =
     let rec aux = function
         | [] -> 0
-        | P :: q -> 1 + aux q
-        | M :: q -> 1 + aux q
-        | L :: q -> 1 + aux q
-        | R :: q -> 1 + aux q
-        | W :: q -> 1 + aux q
-        | Lp bot :: q -> 2 + (longueur bot) + (aux q)
+        | Lp bot :: q -> 2 + (length bot) + (aux q)
+        | _ :: q -> 1 + aux q
     in aux bot
 
 
 
-(* 1. DURÉE DE VIE *)
+(* 1. FITNESS *)
 
+
+(** slightly edited versions of bots found on codegolf,
+    the self flag reduction was removed in order to avoid
+    ties being counted as a victory *)
 let bot_MickeyV4_m     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
 let bot_CounterPunch_m = ">------------>>>>>>><------------<++++++++++++<------------<++++++++++++<------------<++++++++++++>>>>>>>" ^ ("[-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]]>" **^ 21)
 let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>------------------>++++++++++++++++++" ^ (">[++++++++++++++++++[-][-[+]]][++++++++++++++++++[-][-[+]]]" **^ 21)
 
-let bot_objectif = bot_Bigger_m
+
+(** chooses against which bot the algorithm will learn to fight *)
+let objective_bot = bot_Bigger_m
 
 
-let score bot1 bot2 taille pol =
-    match battle bot1 bot2 taille pol with
-    | (Nul, _, _, _) -> 0
-    | (Gauche, Timeout, _, _) -> 1
-    | (Droite, Timeout, _, _) -> -1
-    | (Gauche, Capture, d, n) -> d/10 + 8 - n/200
-    | (Droite, Capture, d, n) -> d/10 - 8 + n/200
-    | (Gauche, Sortie,  _, _) -> 20
-    | (Droite, Sortie,  _, _) -> -20
+let score bot1 bot2 size pol =
+    match joust bot1 bot2 size pol with
+    | (Tie, _, _, _) -> 0
+    | (Left, Timeout, _, _) -> 1
+    | (Right, Timeout, _, _) -> -1
+    | (Left, Capture, d, n) -> d/10 + 8 - n/200
+    | (Right, Capture, d, n) -> d/10 - 8 + n/200
+    | (Left, Exit,  _, _) -> 20
+    | (Right, Exit,  _, _) -> -20
 
 
 let fitness bot =
     let bot_s = sob bot in
-   ((score bot_s bot_objectif 11 Norm) +
-    (score bot_s bot_objectif 21 Norm) +
-    (score bot_s bot_objectif 24 Norm) +
-    (score bot_s bot_objectif 29 Norm) +
-    (score bot_s bot_objectif 30 Norm) +
-    (score bot_s bot_objectif 13 Inv ) +
-    (score bot_s bot_objectif 17 Inv ) +
-    (score bot_s bot_objectif 20 Inv ) +
-    (score bot_s bot_objectif 25 Inv ) +
-    (score bot_s bot_objectif 29 Inv )) / 10
+   ((score bot_s objective_bot 11 Norm) +
+    (score bot_s objective_bot 21 Norm) +
+    (score bot_s objective_bot 24 Norm) +
+    (score bot_s objective_bot 29 Norm) +
+    (score bot_s objective_bot 30 Norm) +
+    (score bot_s objective_bot 13 Inv ) +
+    (score bot_s objective_bot 17 Inv ) +
+    (score bot_s objective_bot 20 Inv ) +
+    (score bot_s objective_bot 25 Inv ) +
+    (score bot_s objective_bot 29 Inv )) / 10
 
 
 let duree_vie bot = let x = (fitness bot + 20) in x*x
@@ -117,45 +120,45 @@ let instr_tab = [|P ; M ; P ; M ; L ; R ; W ; Lp[]|]
 let instr_std_tab = [|P ; M ; P ; M ; L ; R ; W|]
 
 
-let instr_alea () = instr_tab.(Random.int 8)
-let instr_std_alea () = instr_std_tab.(Random.int 7)
+let rand_instr () = instr_tab.(Random.int 8)
+let rand_instr_std () = instr_std_tab.(Random.int 7)
 
 
-(** génère un bot aléatoire de taille = ±len et de profondeur max p_max *)
-let rec bot_alea len p_max =
+(** creates a random bot with a length around 'len' *)
+let rec rand_bot len max_depth =
     let rec aux i =
         if i = 0 then [] else
-        match instr_alea () with
-            | Lp _ -> if p_max < 0 then aux i else
-                      Lp (bot_alea (len/2) (p_max-1)) :: (aux (i-1))
+        match rand_instr () with
+            | Lp _ -> if max_depth < 0 then aux i else
+                      Lp (rand_bot (len/2) (max_depth-1)) :: (aux (i-1))
             | x -> x :: (aux (i-1))
     in aux (1 + Random.int len)
 
 
-let rec ind_alea len p_max =
-    let bot = bot_alea len p_max in
+let rec rand_ind len max_depth =
+    let bot = rand_bot len max_depth in
     {x = Random.int 99; y = Random.int 99; vie = duree_vie bot; code = bot}
 
 
-let rec pop_alea taille = match taille with
+let rec rand_pop size = match size with
     | 0 -> []
-    | n -> (ind_alea 25 3) :: (pop_alea (taille - 1))
+    | n -> (rand_ind 25 3) :: (rand_pop (size - 1))
 
 
 
 (* 3. MUTATIONS *)
 
-let mutation_alea () = [|Insert ; Delete ; Permut|].(Random.int 3)
+let rand_mutation () = [|Insert ; Delete ; Permut|].(Random.int 3)
 
 
-let rec muter_bot bot taux =
+let rec muter_bot bot mut_prob =
     let rec aux = function
-        | Lp l :: q -> Lp (muter_bot l taux) :: (aux q)
-        | t :: Lp l :: q -> t :: Lp (muter_bot l taux) :: (aux q)
+        | Lp l :: q -> Lp (muter_bot l mut_prob) :: (aux q)
+        | t :: Lp l :: q -> t :: Lp (muter_bot l mut_prob) :: (aux q)
         | t :: t' :: q -> (
-            if rand () > taux then t::(aux (t'::q))
-            else match mutation_alea () with
-                    | Insert -> t :: (instr_std_alea ()) :: (aux (t'::q))
+            if rand () > mut_prob then t::(aux (t'::q))
+            else match rand_mutation () with
+                    | Insert -> t :: (rand_instr_std ()) :: (aux (t'::q))
                     | Delete -> aux (t'::q)
                     | Permut -> t'::t::(aux q)
             )
@@ -163,13 +166,13 @@ let rec muter_bot bot taux =
     in aux bot
 
 
-let muter ind taux =
-    let mutant = muter_bot ind.code taux in
+let muter ind mut_prob =s
+    let mutant = muter_bot ind.code mut_prob in
     {x = ind.x; y = ind.y; vie =  duree_vie mutant; code = mutant}
 
 
-let rec muter_pop pop taux = match pop with
-    | t::q -> (muter t taux) :: (muter_pop q taux)
+let rec muter_pop pop mut_prob = match pop with
+    | t::q -> (muter t mut_prob) :: (muter_pop q mut_prob)
     | [] -> []
 
 
@@ -235,7 +238,7 @@ let compare ind1 ind2 =
 (** sélection des meilleurs individus sans doublons*)
 let meilleurs n pop =
     let pop_triee = List.sort_uniq compare pop in
-    n_premiers n (pop_triee @ (pop_alea n))
+    n_premiers n (pop_triee @ (rand_pop n))
 
 
 (** réalise tous les croisements deux à deus possibles *)
@@ -250,19 +253,19 @@ let rec augmente pop = match pop with
         3. Mutations
         4. Ajout de 9 individus aléatoires
     Total = 100 individus *)
-let gen_suivante pop taux =
+let gen_suivante pop mut_prob =
     let parents = meilleurs 10 pop in
-    parents @ (muter_pop (augmente parents) taux) @ (pop_alea 9)
+    parents @ (muter_pop (augmente parents) mut_prob) @ (rand_pop 9)
 
 
-let evolution_s nb_gen taux =
+let evolution_s nb_gen mut_prob =
     p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
-    let pop = ref (pop_alea 100) in
+    let pop = ref (rand_pop 100) in
     for i = 0 to nb_gen do
         p_s "Generation n°" ; p_i i ; p_s " (f:" ;
         let best = hd (meilleurs 1 !pop) in
         p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n () ;
-        pop := gen_suivante !pop taux
+        pop := gen_suivante !pop mut_prob
     done ;
     let resultat = sob (snd (hd (meilleurs 1 !pop))) in
     p_n () ;
@@ -273,16 +276,16 @@ let evolution_s nb_gen taux =
 
 
 (** affiche seulement une génération sur 20 *)    
-let evolution_s_quiet nb_gen taux =
+let evolution_s_quiet nb_gen mut_prob =
     p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
-    let pop = ref (pop_alea 100) in
+    let pop = ref (rand_pop 100) in
     for i = 0 to nb_gen do
         if i mod 20 = 0 then begin
             p_s "Generation n°" ; p_i i ; p_s " (f:" ;
             let best = hd (meilleurs 1 !pop) in
             p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n ()
         end ;
-        pop := gen_suivante !pop taux
+        pop := gen_suivante !pop mut_prob
     done ;
     let resultat = sob (snd (hd (meilleurs 1 !pop))) in
     p_n () ;
