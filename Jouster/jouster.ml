@@ -35,7 +35,7 @@ let iof f = int_of_float f
 
 (* BOTS FIGHTS! *)
 
-(** jumps to the next closing ']' after the i-th character in the bot,
+(** jumps to the matching ']'-bracket after the i-th character in the bot,
     the 'depth' variable allows to avoid sub-loops *)
 let rec jump str_bot i depth = match str_bot.[i] with
     | '[' -> jump str_bot (i+1) (depth+1)
