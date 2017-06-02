@@ -18,12 +18,18 @@ Two bots (Brainfuck programs) are fighting each other in an arena which is repre
 
 Valid instructions are similiar to regular Brainfuck, which means:
 
-> + : Increment cell at your pointer's location by 1
-> - : Decrement cell at your pointer's location by 1
+> \+ : Increment cell at your pointer's location by 1
+> 
+> \- : Decrement cell at your pointer's location by 1
+> 
 > \> : Move your memory pointer by 1 cell towards the enemy flag
+> 
 > < : Move your memory pointer by 1 cell away from the enemy flag
+> 
 > [ : Jump behind the matching ']'-bracket if the cell at your pointer's location equals 0
+> 
 > ] : Jump behind the matching '['-bracket if the cell at your pointer's location is not 0
+> 
 > . : Do nothing
 
 The arena has a size of 10 to 30 cells. At both ends is a 'flag' located which has an initial value of 128, while all other cells are zeroed. A bot's goal is to zero the enemy's flag for 2 consecutive cycles before he zeroes your own flag.
@@ -31,12 +37,12 @@ The arena has a size of 10 to 30 cells. At both ends is a 'flag' located which h
 Each bot starts at his own flag, which is cell [0] from his own perspective. The opponent is located on the other side of the tape.
 
 ```
-[ 128 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 128 ]
+[ 128 | 0 | 0 | 0 | 0 | 0 ... | 0 | 0 | 0 | 0 | 128 ]
    ^                                             ^
-my bot                                       other bot
+left bot                                      right bot
 ```
 
-Both bots execute their action simultaneously, this is considered one cycle. The game ends after 10000 cycles or as soon as one of the winning conditions is reached. If one of the programs reaches its end, it simply stops doing anthing until the end of the game, but can still win.
+Both bots execute their action simultaneously, this is considered one cycle. The game ends after 2000 cycles or as soon as one of the winning conditions is reached. If one of the programs reaches its end, it starts over again.
 
 ### Winning conditions
 
