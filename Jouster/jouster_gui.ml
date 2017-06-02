@@ -16,13 +16,13 @@ Graphics.set_window_title "BrainF*ck Bots Battle!" ;;
 
 
 
-(** TYPAGE **)
+(** TYPES **)
 
-type polarite = Norm | Inv
+type polarity = Norm | Inv
 
 
 
-(** FONCTIONS PRATIQUES **)
+(** BASIC FUNCTIONS AND SHORTCUTS **)
 
 let hd l = List.hd l
 let tl l = List.tl l
@@ -52,7 +52,7 @@ let light_blue = rgb 150 129 255
 let light_red = rgb 249 38 114
 
 
-let traceTexte g =
+let traceText g =
     set_color dark ; fill_rect 0 0 600 500 ;
     set_color (rgb 60 60 60) ;
     fill_rect g 208 (598 - 2*g) 0 ;
@@ -67,69 +67,68 @@ let traceTexte g =
     draw_string "version 3.0"
 
 
-let traceColone g pos valeur couleur =
-    set_color couleur ;
+let traceColumn g pos valeur color =
+    set_color color ;
     if valeur > 0 then
         fill_rect (g + 17*pos) 209 15 (valeur - 1)
     else if valeur < 0 then
         fill_rect (g + 17*pos) (191 + valeur) 15 (-valeur - 1)
 
 
-(* Un ajout appartient à {-1 , 1} *)
-let editeColone g pos val_init ajout couleur =
+(* edits the column vith a variation delta \in {-1 , 1} *)
+let editeColone g pos val_init delta color =
     let g' = g + 17*pos in
-    set_color couleur ;
-    if (abs ajout) > 2 then
-        if ajout < 0 then
-        (traceColone g pos 128 dark ; traceColone g pos (-127) couleur)
+    set_color color ;
+    if (abs delta) > 2 then
+        if delta < 0 then
+        (traceColumn g pos 128 dark ; traceColumn g pos (-127) color)
         else
-        (traceColone g pos (-127) dark ; traceColone g pos 128 couleur)
+        (traceColumn g pos (-127) dark ; traceColumn g pos 128 color)
     else if val_init > 0 then
-        if ajout > 0 then
+        if delta > 0 then
             fill_rect g' (209 + val_init) 15 0
         else
             (set_color dark ; fill_rect g' (209 + val_init - 1) 15 0)
     else if val_init < 0 then
-        if ajout = (-1) then
+        if delta = (-1) then
             fill_rect g' (191 + val_init - 1) 15 0
         else
             (set_color dark ; fill_rect g' (191 + val_init) 15 0)
     else begin (* cas ou val_init = 0 *)
-        traceColone g pos ajout couleur
+        traceColumn g pos delta color
     end
 
 
-let traceBot g pos couleur =
-    set_color couleur ;
+let traceBot g pos color =
+    set_color color ;
     fill_rect (g + 17*pos) 192 15 15 
 
 
 let traceInstant mem bot1 bot2 =
     let g = (600 - ((Array.length mem) * 17)) / 2 in (
     clear_graph () ;
-    traceTexte g ;
+    traceText g ;
     let len = Array.length mem in
     for i = 0 to (len -1) do
-        let couleur = if i = 0 then light_blue
+        let color = if i = 0 then light_blue
                     else if i = (len -1) then light_red
                     else white in
-        traceColone g i mem.(i) couleur
+        traceColumn g i mem.(i) color
     done ;
     if bot1 = bot2 then traceBot g bot1 magenta
     else (traceBot g bot1 blue ; traceBot g bot2 red)
     )
 
 
-(* Hypothèse simplificatrice : les colones sont modifiées de 1, 0 ou -1 *)
 let traceVariation mem1 mem2 bi bf ri rf =
     let g = (600 - ((Array.length mem1) * 17)) / 2 in (
     let len = Array.length mem2 in
     for i = 0 to (len -1) do
         if mem1.(i) == mem2.(i) then () else
-        let couleur = if i = 0 then light_blue
+        let color = if i = 0 then light_blue
                     else if i = (len -1) then light_red
                     else white in
-        editeColone g i mem1.(i) (mem2.(i) - mem1.(i)) couleur
+        editeColone g i mem1.(i) (mem2.(i) - mem1.(i)) color
     done ;
     match (bf-bi, rf-ri, bf-rf, bi-ri) with
         | 0,0,_,_ -> ()
@@ -153,15 +152,18 @@ let traceWinner id =
 
 
 
-(* COMBAT DE BOTS! *)
+(* BOTS FIGHTS! *)
 
-let rec jump bot i c = match bot.[i] with
-    | '[' -> jump bot (i+1) (c+1)
-    | ']' -> if c = 1 then i else jump bot (i+1) (c-1)
-    |  _  -> jump bot (i+1) c
+(** jumps to the matching ']'-bracket after the i-th character in the bot,
+    the 'depth' variable allows to avoid sub-loops *)
+let rec jump str_bot i depth = match str_bot.[i] with
+    | '[' -> jump str_bot (i+1) (depth+1)
+    | ']' -> if depth = 1 then i else jump str_bot (i+1) (depth-1)
+    |  _  -> jump str_bot (i+1) depth
 
 
-let reverse_bot str_bot =
+(** returns an inverted copy of the bot *)
+let rev_bot str_bot =
     let copy = Bytes.copy str_bot in
     let len = String.length(copy) in
     for i = 0 to len - 1 do
@@ -172,7 +174,8 @@ let reverse_bot str_bot =
     done ; copy
 
 
-let reverse_pol_bot str_bot =
+(** returns an polarity-reverted copy of the bot *)
+let rev_pol_bot str_bot =
     let copy = Bytes.copy str_bot in
     let len = String.length(copy) in
     for i = 0 to len - 1 do
@@ -183,12 +186,12 @@ let reverse_pol_bot str_bot =
     done ; copy
 
 
-let battle_gui bot1 bot2 taille pol secs =
+let battle_gui bot1 bot2 size pol secs =
     traceWinner (
     let bot2 = reverse_bot (if pol = Inv then reverse_pol_bot bot2 else bot2) in
-    let mem = [|128|] @@ ([|0|] *@ (taille - 2)) @@ [|128|] in
+    let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
     let len1, len2 = String.length bot1, String.length bot2 in
-    traceInstant mem 0 (taille - 1) ; pause 0.5 ;
+    traceInstant mem 0 (size - 1) ; pause 0.5 ;
     let exec bot p i l = match bot.[i] with
         | '>' -> (p + 1, i + 1, l)
         | '<' -> (p - 1, i + 1, l)
@@ -204,7 +207,7 @@ let battle_gui bot1 bot2 taille pol secs =
         |  _  -> (p, i + 1, l)
     in let rec fight cycle p1 p2 i1 i2 l1 l2 z1 z2 =
         if cycle > 5000 then
-            let delta = (abs mem.(0) - abs mem.(taille - 1)) in
+            let delta = (abs mem.(0) - abs mem.(size - 1)) in
             if delta > 0 then 1 else if delta < 0 then -1 else 0
         else
             let mem_i, p1_i = Array.copy mem, p1 in
@@ -214,16 +217,16 @@ let battle_gui bot1 bot2 taille pol secs =
             let (p2, i2, l2) = exec bot2 p2 (if i2 >= len2 then 0 else i2) l2 in
                 traceVariation mem_i mem p1 p1 p2_i p2 ;
                 pause secs ;
-        let zz1, zz2 = (mem.(0) = 0), (mem.(taille - 1) = 0) in
-        if (zz1 && z1) || (zz2 && z2) || p1 < 0 || p2 < 0 || p1 = taille || p2 = taille then
+        let zz1, zz2 = (mem.(0) = 0), (mem.(size - 1) = 0) in
+        if (zz1 && z1) || (zz2 && z2) || p1 < 0 || p2 < 0 || p1 = size || p2 = size then
             begin
                 if (zz1 && z1) && (zz2 && z2) then 0 else
-                if (abs (p1 - p2)) = (taille + 1) then 0 else
-                if (zz1 && z1) || (p1 < 0) || (p1 = taille) then (-1)
+                if (abs (p1 - p2)) = (size + 1) then 0 else
+                if (zz1 && z1) || (p1 < 0) || (p1 = size) then (-1)
                 else 1
             end
-        else fight (cycle + 1) p1 p2 i1 i2 l1 l2 (mem.(0) = 0) (mem.(taille-1) = 0)
-    in fight 0 0 (taille -1) 0 0 [] [] false false
+        else fight (cycle + 1) p1 p2 i1 i2 l1 l2 (mem.(0) = 0) (mem.(size-1) = 0)
+    in fight 0 0 (size -1) 0 0 [] [] false false
     )
 
 
@@ -237,12 +240,12 @@ let all_battles_gui bot1 bot2 secs =
 
 
 
-(** TESTS GRAPHIQUES **)
+(** GRAPHIC DEBUG **)
 
 let randrange amplitude = Random.int(2*amplitude + 1) - amplitude
 
-let rec random_mem taille amp = if taille = 0 then [||]
-    else [|(randrange amp/2)+(randrange amp/2)|] @@ (random_mem (taille - 1) amp)
+let rec random_mem size amp = if size = 0 then [||]
+    else [|(randrange amp/2)+(randrange amp/2)|] @@ (random_mem (size - 1) amp)
 
 let random_disp () =
     traceInstant ([|123|] @@ (random_mem 28 50) @@ [|119|]) (Random.int 30) (Random.int 30)
