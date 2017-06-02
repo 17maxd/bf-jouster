@@ -186,7 +186,7 @@ let rev_pol_bot str_bot =
     done ; copy
 
 
-let battle_gui bot1 bot2 size pol secs =
+let joust_gui bot1 bot2 size pol secs =
     traceWinner (
     let bot2 = reverse_bot (if pol = Inv then reverse_pol_bot bot2 else bot2) in
     let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
@@ -233,9 +233,9 @@ let battle_gui bot1 bot2 size pol secs =
 let all_battles_gui bot1 bot2 secs =
     for i = 10 to 30 do
         pause 0.5 ;
-        battle_gui bot1 bot2 i Norm secs ;
+        joust_gui bot1 bot2 i Norm secs ;
         pause 0.5 ;
-        battle_gui bot1 bot2 i Inv secs ;
+        joust_gui bot1 bot2 i Inv secs ;
     done
 
 
