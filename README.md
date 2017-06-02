@@ -51,8 +51,9 @@ A bot wins under one of the following conditions:
 The function `joust` file computes the issue of a fight between two bots, on a given arena size and polarity.
 
 ```ocaml
-joust bot_MickeyV4_m bot_Bigger_m 25 Norm;;
+# joust bot_MickeyV4_m bot_Bigger_m 25 Norm;;
 - : winner * joust_issue * int * int = (Left, Capture, 115, 1618)
+```
 
 The function `( *>> )` outputs the issues from fights on all ranges and polarities between two bots
 
@@ -69,14 +70,16 @@ Score : 8
 The function `joust_gui` displays an animation of a joust between two bots. The last parameter is the number of seconds between two frames.
 
 ```ocaml
-joust_gui bot_MickeyV4_m bot_Bigger_m 25 Norm 0.01;;
+# joust_gui bot_MickeyV4_m bot_Bigger_m 25 Norm 0.01;;
 ```
 
 ![joust_gui](/images/joust_gui.gif)
 
+
+
 ## 1. Standard genetic algorithm
 
-
+(yet to come...)
 
 ## 2 Ecosystem simulation (`ecosystem.ml`)
 
