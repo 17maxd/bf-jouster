@@ -34,16 +34,15 @@ let (-=) a b = (a := (!a - b))
 
 let rand () = Random.float 1.0
 
-let (@-) l n = List.nth l n
+let (@-) = List.nth
 
 let rec ( **^) str n =
     if n < 1 then ""
     else (str ^ str) **^ (n / 2) ^ if n mod 2 = 0 then "" else str
 
-let p_i i = print_int i
-let p_s s = print_string s
-let p_n () = print_newline ()
-
+let p_i = print_int
+let p_s = print_string
+let p_n = print_newline
 
 
 (* ABOUT:ROBOTS *)
@@ -57,7 +56,7 @@ let rec string_of_bot = function
     | W :: q -> "." ^ string_of_bot q
     | Lp bot :: q -> "[" ^ (string_of_bot bot) ^ "]" ^ string_of_bot q
 
-let sob bot = string_of_bot bot
+let sob = string_of_bot
 
 
 (** calculates the length of the string representation of a bot *)
@@ -166,7 +165,7 @@ let rec muter_bot bot mut_prob =
     in aux bot
 
 
-let muter ind mut_prob =s
+let muter ind mut_prob =
     let mutant = muter_bot ind.code mut_prob in
     {x = ind.x; y = ind.y; vie =  duree_vie mutant; code = mutant}
 
@@ -222,80 +221,3 @@ let croise ind1 ind2 =
     {x = ind1.x; y = ind1.y; vie = duree_vie enfant; code = enfant}
 
 
-
-(* 5. ALGORITHME GÉNÉTIQUE STANDARD *)
-
-(** comparaison : d'abord la fitness puis la longueur.
-    on evite bien les trios se battant tous mutuellement *)
-
-let compare ind1 ind2 =
-    if ind1 = ind2 then 0 else
-        if (fst ind2) = (fst ind1)
-        then longueur (snd ind2) - longueur (snd ind1)
-    else (fst ind2) - (fst ind1)
-
-
-(** sélection des meilleurs individus sans doublons*)
-let meilleurs n pop =
-    let pop_triee = List.sort_uniq compare pop in
-    n_premiers n (pop_triee @ (rand_pop n))
-
-
-(** réalise tous les croisements deux à deus possibles *)
-let rec augmente pop = match pop with
-    | [] -> []
-    | t::q -> (List.map (croise t) q) @ (augmente q)
-    
-
-(** la génération suivante est obtenue de la sorte :
-        1. Sélection des 13 meilleurs
-        2. Croisements (nouveau total = 91)
-        3. Mutations
-        4. Ajout de 9 individus aléatoires
-    Total = 100 individus *)
-let gen_suivante pop mut_prob =
-    let parents = meilleurs 10 pop in
-    parents @ (muter_pop (augmente parents) mut_prob) @ (rand_pop 9)
-
-
-let evolution_s nb_gen mut_prob =
-    p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
-    let pop = ref (rand_pop 100) in
-    for i = 0 to nb_gen do
-        p_s "Generation n°" ; p_i i ; p_s " (f:" ;
-        let best = hd (meilleurs 1 !pop) in
-        p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n () ;
-        pop := gen_suivante !pop mut_prob
-    done ;
-    let resultat = sob (snd (hd (meilleurs 1 !pop))) in
-    p_n () ;
-    p_s ("Résultat :  " ^ resultat) ;
-    p_n () ; p_n () ;
-    resultat *>> bot_objectif
-
-
-
-(** affiche seulement une génération sur 20 *)    
-let evolution_s_quiet nb_gen mut_prob =
-    p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
-    let pop = ref (rand_pop 100) in
-    for i = 0 to nb_gen do
-        if i mod 20 = 0 then begin
-            p_s "Generation n°" ; p_i i ; p_s " (f:" ;
-            let best = hd (meilleurs 1 !pop) in
-            p_i (fst best) ; p_s ") : " ; p_s (sob (snd best)) ; p_n ()
-        end ;
-        pop := gen_suivante !pop mut_prob
-    done ;
-    let resultat = sob (snd (hd (meilleurs 1 !pop))) in
-    p_n () ;
-    p_s ("Résultat :  " ^ resultat) ;
-    p_n () ; p_n () ;
-    resultat *>> bot_objectif
-
-
-let evolve () =
-    for i = 0 to 20 do
-        evolution_s_quiet 200 0.1 ;
-        p_n ()
-    done

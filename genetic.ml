@@ -31,15 +31,15 @@ let (-=) a b = (a := (!a - b))
 
 let rand () = Random.float 1.0
 
-let (@-) l n = List.nth l n
+let (@-) = List.nth
 
 let rec ( **^) str n =
     if n < 1 then ""
     else (str ^ str) **^ (n / 2) ^ if n mod 2 = 0 then "" else str
 
-let p_i i = print_int i
-let p_s s = print_string s
-let p_n () = print_newline ()
+let p_i = print_int
+let p_s = print_string
+let p_n = print_newline
 
 
 
@@ -54,7 +54,7 @@ let rec string_of_bot = function
     | W :: q -> "." ^ string_of_bot q
     | Lp bot :: q -> "[" ^ (string_of_bot bot) ^ "]" ^ string_of_bot q
 
-let sob bot = string_of_bot bot
+let sob = string_of_bot
 
 
 (** calculates the length of the string representation of a bot *)

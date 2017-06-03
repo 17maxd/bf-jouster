@@ -18,18 +18,18 @@ type winner = Left | Tie | Right
 
 (** BASIC FUNCTIONS AND SHORTCUTS **)
 
-let hd l = List.hd l
-let tl l = List.tl l
+let hd = List.hd
+let tl = List.tl
 
 let (+=) a b = (a := (!a + b))
 let (-=) a b = (a := (!a - b))
 
-let (@@) array1 array2 = Array.append array1 array2
+let (@@) = Array.append
 
 let rec ( *@ ) arr n = if n <= 0 then [||] else arr @@ (arr *@ (n-1)) 
 
-let foi i = float_of_int i
-let iof f = int_of_float f
+let foi = float_of_int
+let iof = int_of_float
 
 
 

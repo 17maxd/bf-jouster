@@ -24,10 +24,10 @@ type polarity = Norm | Inv
 
 (** BASIC FUNCTIONS AND SHORTCUTS **)
 
-let hd l = List.hd l
-let tl l = List.tl l
+let hd = List.hd
+let tl = List.tl
 
-let (@@) array1 array2 = Array.append array1 array2
+let (@@) = Array.append
 
 let rec ( *@) arr n = if n <= 0 then [||] else arr @@ (arr *@ (n-1)) 
 let rec ( *^) str n = if n <= 0 then ""   else str  ^ (str *^ (n-1))
