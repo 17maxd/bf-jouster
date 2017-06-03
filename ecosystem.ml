@@ -1,7 +1,7 @@
 (*
-    File : ecosysteme.ml
-    Version : 1.0
-    Author : Max D3
+    File: ecosystem.ml
+    Version: 1.0
+    Author: Max D3
 *)
 
 
@@ -12,18 +12,15 @@ type bot = instr list
 and instr = | P | M | L | R | W
             | Lp of instr list
 
-type polarite = Norm | Inv
+type polarity = Norm | Inv
 
 type mutation = Insert | Delete | Permut
 
-type fin_combat = Timeout | Capture | Exit
+type joust_issue = Timeout | Capture | Exit
 
-type gagnant = Left | Tie | Right
+type winner = Left | Tie | Right
 
-type individual = { mutable x : int ;
-                    mutable y : int ;
-                    mutable vie : int ;
-                    mutable code : bot }
+type individual = { x : int ; y : int ; life : int ; code : bot }
 
 
 
@@ -43,6 +40,7 @@ let rec ( **^) str n =
 let p_i = print_int
 let p_s = print_string
 let p_n = print_newline
+
 
 
 (* ABOUT:ROBOTS *)
@@ -109,11 +107,11 @@ let fitness bot =
     (score bot_s objective_bot 29 Inv )) / 10
 
 
-let duree_vie bot = let x = (fitness bot + 20) in x*x
+let life_expectancy bot = let x = (fitness bot + 20) in x*x
 
 
 
-(* 2. GÉNÉRATION ALÉATOIRE *)
+(* 2. RANDOM BOTS GENERATION *)
 
 let instr_tab = [|P ; M ; P ; M ; L ; R ; W ; Lp[]|]
 let instr_std_tab = [|P ; M ; P ; M ; L ; R ; W|]
@@ -136,7 +134,7 @@ let rec rand_bot len max_depth =
 
 let rec rand_ind len max_depth =
     let bot = rand_bot len max_depth in
-    {x = Random.int 99; y = Random.int 99; vie = duree_vie bot; code = bot}
+    {x = Random.int 99; y = Random.int 99; life = life_expectancy bot; code = bot}
 
 
 let rec rand_pop size = match size with
@@ -150,10 +148,10 @@ let rec rand_pop size = match size with
 let rand_mutation () = [|Insert ; Delete ; Permut|].(Random.int 3)
 
 
-let rec muter_bot bot mut_prob =
+let rec mutate_bot bot mut_prob =
     let rec aux = function
-        | Lp l :: q -> Lp (muter_bot l mut_prob) :: (aux q)
-        | t :: Lp l :: q -> t :: Lp (muter_bot l mut_prob) :: (aux q)
+        | Lp l :: q -> Lp (mutate_bot l mut_prob) :: (aux q)
+        | t :: Lp l :: q -> t :: Lp (mutate_bot l mut_prob) :: (aux q)
         | t :: t' :: q -> (
             if rand () > mut_prob then t::(aux (t'::q))
             else match rand_mutation () with
@@ -165,20 +163,20 @@ let rec muter_bot bot mut_prob =
     in aux bot
 
 
-let muter ind mut_prob =
-    let mutant = muter_bot ind.code mut_prob in
-    {x = ind.x; y = ind.y; vie =  duree_vie mutant; code = mutant}
+let mutate ind mut_prob =
+    let mutant = mutate_bot ind.code mut_prob in
+    {x = ind.x; y = ind.y; life = life_expectancy mutant; code = mutant}
 
 
-let rec muter_pop pop mut_prob = match pop with
-    | t::q -> (muter t mut_prob) :: (muter_pop q mut_prob)
+let rec mutate_pop pop mut_prob = match pop with
+    | t::q -> (mutate t mut_prob) :: (mutate_pop q mut_prob)
     | [] -> []
 
 
 
-(* 4. DÉPLACEMENTS *)
+(* 4. MOVING *)
 
-let deplace ind =
+let move ind =
     if ind.x = 0  then ind.x <- ind.x + Random.int 3 else
     if ind.x = 99 then ind.x <- ind.x - Random.int 3 else
     ind.x <- ind.x + (Random.int 7) - 3 ;
@@ -187,37 +185,42 @@ let deplace ind =
     ind.y <- ind.y + (Random.int 7) - 3
 
 
-let rec deplace_pop = function
-    | t::q -> (deplace t ; deplace_pop q)
+let rec move_pop = function
+    | t::q -> (move t ; move_pop q)
     | [] -> ()
 
 
 
-(* 5. CROISEMENTS *)
+(* 5. BREEDING *)
 
-let rec n_derniers n liste =
-    if n >= List.length liste then liste else
-    match liste with
-        | t::q -> n_derniers n q
-        | _ -> []
-
-let rec n_premiers n liste = match (n, liste) with
-    | 0, _ -> []
-    | _, t::q -> t :: (n_premiers (n-1) q)
-    | _, [] -> failwith "liste trop courte"
+(** outputs the first n elements from a list.
+    if len(list) > n, outputs the whole list. *)
+let rec first_n n list =
+    if n <= 0 then [] else
+    if n >= List.length list then list else
+    (hd list) :: (first_n (n-1) (tl list))
 
 
-(** croisements entre deux bots, avec un enfant de la longueur de bot2 *)
-let croise_bot bot1 bot2 =
+(** outputs the last n elements from a list.
+    if len(list) > n, outputs the whole list. *)
+let rec last_n n list =
+    if n <= 0 then [] else
+    if n >= List.length list then list else
+    last_n n (tl list)
+
+
+(** mating two bots, giving a child having the same length as bot2 *)
+let mate_bot bot1 bot2 =
     let pos1 = Random.int (List.length bot1) in
     let pos2 = max ((List.length bot2) - pos1) 0 in
     if Random.bool () then
-         (n_premiers pos1 bot1) @ (n_derniers pos2 bot2)
-    else (n_premiers pos2 bot2) @ (n_derniers pos1 bot1) 
+         (first_n pos1 bot1) @ (last_n pos2 bot2)
+    else (first_n pos2 bot2) @ (last_n pos1 bot1) 
 
 
-let croise ind1 ind2 =
-    let enfant = croise_bot ind1.code ind2.code in
-    {x = ind1.x; y = ind1.y; vie = duree_vie enfant; code = enfant}
+let mate ind1 ind2 =
+    let child = mate_bot ind1.code ind2.code in
+    {x = ind1.x; y = ind1.y; life = life_expectancy enfant; code = enfant}
+
 
 
