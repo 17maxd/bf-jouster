@@ -52,7 +52,7 @@ let light_blue = rgb 150 129 255
 let light_red = rgb 249 38 114
 
 
-let traceText g =
+let trace_text g =
     set_color dark ; fill_rect 0 0 600 500 ;
     set_color (rgb 60 60 60) ;
     fill_rect g 208 (598 - 2*g) 0 ;
@@ -67,16 +67,16 @@ let traceText g =
     draw_string "version 3.0"
 
 
-let traceColumn g pos valeur color =
+let traceColumn g pos heigth color =
     set_color color ;
-    if valeur > 0 then
-        fill_rect (g + 17*pos) 209 15 (valeur - 1)
-    else if valeur < 0 then
-        fill_rect (g + 17*pos) (191 + valeur) 15 (-valeur - 1)
+    if heigth > 0 then
+        fill_rect (g + 17*pos) 209 15 (heigth - 1)
+    else if heigth < 0 then
+        fill_rect (g + 17*pos) (191 + heigth) 15 (-heigth - 1)
 
 
 (* edits the column vith a variation delta \in {-1 , 1} *)
-let editeColone g pos val_init delta color =
+let editeColumn g pos val_init delta color =
     let g' = g + 17*pos in
     set_color color ;
     if (abs delta) > 2 then
@@ -99,15 +99,15 @@ let editeColone g pos val_init delta color =
     end
 
 
-let traceBot g pos color =
+let trace_bot g pos color =
     set_color color ;
     fill_rect (g + 17*pos) 192 15 15 
 
 
-let traceInstant mem bot1 bot2 =
+let trace_instant mem bot1 bot2 =
     let g = (600 - ((Array.length mem) * 17)) / 2 in (
     clear_graph () ;
-    traceText g ;
+    trace_text g ;
     let len = Array.length mem in
     for i = 0 to (len -1) do
         let color = if i = 0 then light_blue
@@ -115,12 +115,14 @@ let traceInstant mem bot1 bot2 =
                     else white in
         traceColumn g i mem.(i) color
     done ;
-    if bot1 = bot2 then traceBot g bot1 magenta
-    else (traceBot g bot1 blue ; traceBot g bot2 red)
+    if bot1 = bot2 then trace_bot g bot1 magenta
+    else (trace_bot g bot1 blue ; trace_bot g bot2 red)
     )
 
 
-let traceVariation mem1 mem2 bi bf ri rf =
+(** bot1 (blue) went from pos bi to bf
+    bot2 (red) went from pos ri to rf *)
+let trace_variation mem1 mem2 bi bf ri rf =
     let g = (600 - ((Array.length mem1) * 17)) / 2 in (
     let len = Array.length mem2 in
     for i = 0 to (len -1) do
@@ -128,22 +130,22 @@ let traceVariation mem1 mem2 bi bf ri rf =
         let color = if i = 0 then light_blue
                     else if i = (len -1) then light_red
                     else white in
-        editeColone g i mem1.(i) (mem2.(i) - mem1.(i)) color
+        editeColumn g i mem1.(i) (mem2.(i) - mem1.(i)) color
     done ;
     match (bf-bi, rf-ri, bf-rf, bi-ri) with
         | 0,0,_,_ -> ()
-        | 0,_,0,_ -> (traceBot g ri dark ; traceBot g rf magenta)
-        | 0,_,_,0 -> (traceBot g bi blue     ; traceBot g rf red)
-        | 0,_,_,_ -> (traceBot g ri dark ; traceBot g rf red)
-        | _,0,0,_ -> (traceBot g bi dark ; traceBot g bf magenta)
-        | _,0,_,0 -> (traceBot g ri red      ; traceBot g bf blue)
-        | _,0,_,_ -> (traceBot g bi dark ; traceBot g bf blue)
-        | _ -> (traceBot g bi dark ; traceBot g ri dark ;
-                traceBot g bf blue ; traceBot g rf red)
+        | 0,_,0,_ -> (trace_bot g ri dark ; trace_bot g rf magenta)
+        | 0,_,_,0 -> (trace_bot g bi blue ; trace_bot g rf red)
+        | 0,_,_,_ -> (trace_bot g ri dark ; trace_bot g rf red)
+        | _,0,0,_ -> (trace_bot g bi dark ; trace_bot g bf magenta)
+        | _,0,_,0 -> (trace_bot g ri red  ; trace_bot g bf blue)
+        | _,0,_,_ -> (trace_bot g bi dark ; trace_bot g bf blue)
+        | _ ->       (trace_bot g bi dark ; trace_bot g ri dark ;
+                      trace_bot g bf blue ; trace_bot g rf red)
     )
 
 
-let traceWinner id =
+let trace_winner id =
     moveto (match id with 0 -> 235 | 1 -> 241 | _ -> 247) 20 ;
     set_color white ;
     set_font "-*-fixed-medium-r-semicondensed--25-*-*-*-*-*-iso8859-1" ;
@@ -187,11 +189,11 @@ let rev_pol_bot str_bot =
 
 
 let joust_gui bot1 bot2 size pol secs =
-    traceWinner (
-    let bot2 = reverse_bot (if pol = Inv then reverse_pol_bot bot2 else bot2) in
+    trace_winner (
+    let bot2 = rev_bot (if pol = Inv then rev_pol_bot bot2 else bot2) in
     let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
     let len1, len2 = String.length bot1, String.length bot2 in
-    traceInstant mem 0 (size - 1) ; pause 0.5 ;
+    trace_instant mem 0 (size - 1) ; pause 0.5 ;
     let exec bot p i l = match bot.[i] with
         | '>' -> (p + 1, i + 1, l)
         | '<' -> (p - 1, i + 1, l)
@@ -212,10 +214,10 @@ let joust_gui bot1 bot2 size pol secs =
         else
             let mem_i, p1_i = Array.copy mem, p1 in
             let (p1, i1, l1) = exec bot1 p1 (if i1 >= len1 then 0 else i1) l1 in
-                traceVariation mem_i mem p1_i p1 p2 p2 ;
+                trace_variation mem_i mem p1_i p1 p2 p2 ;
             let mem_i, p2_i = Array.copy mem, p2 in
             let (p2, i2, l2) = exec bot2 p2 (if i2 >= len2 then 0 else i2) l2 in
-                traceVariation mem_i mem p1 p1 p2_i p2 ;
+                trace_variation mem_i mem p1 p1 p2_i p2 ;
                 pause secs ;
         let zz1, zz2 = (mem.(0) = 0), (mem.(size - 1) = 0) in
         if (zz1 && z1) || (zz2 && z2) || p1 < 0 || p2 < 0 || p1 = size || p2 = size then
@@ -248,8 +250,7 @@ let rec random_mem size amp = if size = 0 then [||]
     else [|(randrange amp/2)+(randrange amp/2)|] @@ (random_mem (size - 1) amp)
 
 let random_disp () =
-    traceInstant ([|123|] @@ (random_mem 28 50) @@ [|119|]) (Random.int 30) (Random.int 30)
-
+    trace_instant ([|123|] @@ (random_mem 28 50) @@ [|119|]) (Random.int 30) (Random.int 30)
 
 ;;
 
