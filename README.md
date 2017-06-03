@@ -97,7 +97,7 @@ Individuals are now moving randomly on a 100x100 grid. In the first variation, w
 
 After a certain amount of cycles, the simulation can be stopped by stopping any breeding. The size of the population is then forced to decrease, and the last individual alive is the winner of the simulation.
 
-### 2) First variant : standard ecosystem
+### First variant : standard ecosystem
 
 (corresponds to the function `ecosystem_std` in `ecosystem.ml`)
 
@@ -113,7 +113,7 @@ Two special rules can be temporarily be applied in specific cases: if the popula
 
 After a fixed number of cycles, 
 
-### 2) Second variant : death match ecosystem
+### Second variant : death match ecosystem
 
 (corresponds to the function `ecosystem_dm` in `ecosystem.ml`)
 
