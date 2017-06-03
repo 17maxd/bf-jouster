@@ -1,7 +1,7 @@
 (*
-    File : genetic.ml
-    Version : 2.0
-    Author : Max D3
+    File: genetic.ml
+    Version: 2.0
+    Author: Max D3
 *)
 
 
@@ -20,7 +20,7 @@ type joust_issue = Timeout | Capture | Exit
 
 type winner = Left | Tie | Right
 
-type individual = {fit : int ; code : bot}
+type individual = { fit : int ; code : bot }
 
 
 
@@ -93,7 +93,7 @@ let score bot1 bot2 size pol =
     | (Right, Exit,  _, _) -> -20
 
 
-let fitness bot =
+(* let fitness bot =
     let bot_s = sob bot in
    ((score bot_s objective_bot 11 Norm) +
     (score bot_s objective_bot 21 Norm) +
@@ -104,10 +104,12 @@ let fitness bot =
     (score bot_s objective_bot 17 Inv ) +
     (score bot_s objective_bot 20 Inv ) +
     (score bot_s objective_bot 25 Inv ) +
-    (score bot_s objective_bot 29 Inv )) / 10
+    (score bot_s objective_bot 29 Inv )) / 10 *)
 
-
-
+let fitness bot = score (sob bot) objective_bot 30 Norm
+    
+    
+    
 (* 2. RANDOM BOTS GENERATION *)
 
 let instr_tab = [|P ; M ; P ; M ; L ; R ; W ; Lp[]|]
@@ -130,7 +132,8 @@ let rec rand_bot len max_depth =
 
 
 let rec rand_ind len max_depth =
-    let bot = rand_bot len max_depth in {fit = fitness bot; code = bot}
+    let bot = rand_bot len max_depth in
+    {fit = fitness bot; code = bot}
 
 
 let rec rand_pop size = match size with
@@ -170,19 +173,22 @@ let rec mutate_pop pop mut_prob = match pop with
 
 
 
-(* 4. MATING *)
+(* 4. BREEDING *)
 
-let rec last_n n list =
-    if n >= List.length list then list else
-    match list with
-        | t::q -> last_n n q
-        | _ -> []
-
+(** outputs the first n elements from a list.
+    if len(list) > n, outputs the whole list. *)
 let rec first_n n list =
+    if n <= 0 then [] else
     if n >= List.length list then list else
-    match list with
-        | t::q -> t :: (first_n (n-1) q)
-        | _ -> []
+    (hd list) :: (first_n (n-1) (tl list))
+
+
+(** outputs the last n elements from a list.
+    if len(list) > n, outputs the whole list. *)
+let rec last_n n list =
+    if n <= 0 then [] else
+    if n >= List.length list then list else
+    last_n n (tl list)
 
 
 (** mating two bots, giving a child having the same length as bot2 *)
@@ -195,8 +201,14 @@ let mate_bot bot1 bot2 =
 
 
 let mate ind1 ind2 =
-    let enfant = mate_bot ind1.code ind2.code in
-    {fit = fitness enfant; code = enfant}
+    let child = mate_bot ind1.code ind2.code in
+    {fit = fitness child; code = child}
+
+
+(** mates every possible couple of bots from pop *)
+let rec mate_pop = function
+    | [] -> []
+    | t::q -> (List.map (mate t) q) @ (mate_pop q)
 
 
 
@@ -210,17 +222,13 @@ let compare ind1 ind2 =
     else ind2.fit - ind1.fit
 
 
-(** selects the n best individuals, removing doubles *)
+(** selects the n best individuals, removing doubles. If len(pop)<n, random
+individuals are picked to replace the missing ones *)
 let best_n n pop =
-    let pop_triee = List.sort_uniq compare pop in
-    first_n n (pop_triee @ (rand_pop n))
-
-
-(** mates every possible couple of bot from pop *)
-let rec augmente pop = match pop with
-    | [] -> []
-    | t::q -> (List.map (mate t) q) @ (augmente q)
-    
+    let sorted_pop = List.sort_uniq compare pop in
+    if n <= List.length sorted_pop
+        then first_n n sorted_pop
+        else first_n n (sorted_pop @ (rand_pop n))
 
 (** the next generation os obtained by: :
         1. Selecting the top 13 bots
@@ -229,43 +237,42 @@ let rec augmente pop = match pop with
         4. Introduction of 9 random bots
     Total = 100 individuals *)
 let next_generation pop mut_prob =
-    let parents = best_n 10 pop in
-    parents @ (mutate_pop (augmente parents) mut_prob) @ (rand_pop 9)
+    let parents = best_n 13 pop in
+    parents @ (mutate_pop (mate_pop parents) mut_prob) @ (rand_pop 9)
 
 
 let evolution nb_gen mut_prob =
-    p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
+    Printf.printf "\n%d" (Random.int 10000) ; (* random ID *)
+    print_newline () ;
     let pop = ref (rand_pop 100) in
     for i = 0 to nb_gen do
-        p_s "Generation n°" ; p_i i ; p_s " (f:" ;
         let best = hd (best_n 1 !pop) in
-        p_i best.fit ; p_s ") : " ; p_s (sob best.code) ; p_n () ;
+        let fit, code = best.fit, (sob best.code) in
+        Printf.printf "Generation n°%d (f:%d) : %s\n" i fit code ;
+        print_newline () ;
         pop := next_generation !pop mut_prob
     done ;
     let result = sob (hd (best_n 1 !pop)).code in
-    p_n () ;
-    p_s ("Result:  " ^ result) ;
-    p_n () ; p_n () ;
+    Printf.printf "\nResult: %s\n\n" result ;
     result *>> objective_bot
-
 
 
 (** same as the previous, displays the current best only every 20 generations *)    
 let evolution_quiet nb_gen mut_prob =
-    p_n () ; p_i (Random.int 10000) ; p_n () ; (* random ID *)
+    Printf.printf "\n%d\n" (Random.int 10000) ; (* random ID *)
+    print_newline () ;
     let pop = ref (rand_pop 100) in
     for i = 0 to nb_gen do
         if i mod 20 = 0 then begin
-            p_s "Generation n°" ; p_i i ; p_s " (f:" ;
             let best = hd (best_n 1 !pop) in
-            p_i best.fit ; p_s ") : " ; p_s (sob best.code) ; p_n ()
+            let fit, code = best.fit, (sob best.code) in
+            Printf.printf "Generation n°%d (f:%d) : %s" i fit code ;
+            print_newline ()
         end ;
         pop := next_generation !pop mut_prob
     done ;
     let result = sob (hd (best_n 1 !pop)).code in
-    p_n () ;
-    p_s ("Result:  " ^ result) ;
-    p_n () ; p_n () ;
+    Printf.printf "\nResult: %s\n\n" result ;
     result *>> objective_bot
 
 
@@ -276,10 +283,8 @@ let evolution_silent nb_gen mut_prob =
         pop := next_generation !pop mut_prob
     done ;
     let result = sob (hd (best_n 1 !pop)).code in
-    p_n () ;
-    p_s ("Result:  " ^ result) ;
-    p_n () ; p_n () ;
-    result *> objective_bot
+    Printf.printf "\nResult: %s\n\n" result ;
+    result *>> objective_bot
 
 
 (** run this, have a break, then admire the results ! *)
