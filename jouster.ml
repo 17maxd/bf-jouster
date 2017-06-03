@@ -1,7 +1,7 @@
 (*
-    File : jouster.ml
-    Version : 3.0
-    Author : Max D3
+    File: jouster.ml
+    Version: 3.0
+    Author: Max D3
 *)
 
 
@@ -163,4 +163,4 @@ let speedtest bot1 bot2 =
         ignore (bot1 *> bot2)
     done ;
     let cps = iof (foi 840 /. (Sys.time () -. t)) in
-    Printf.printf "%d combats par seconde !\n" cps
+    Printf.printf "%d fights per seconds!\n" cps
