@@ -56,7 +56,7 @@ A bot wins under one of the following conditions:
 
 ### `jouster.ml`
 
-The function `joust` file computes the issue of a fight between two bots, on a given arena size and polarity.
+The function `joust` file computes the issue of a fight between two bots, on a given arena size and polarity. Syntax: `joust bot1 bot2 arena_size polarity`.
 
 ```ocaml
 # joust bot_MickeyV4_m bot_Bigger_m 25 Norm;;
@@ -75,7 +75,7 @@ Score : 8
 
 ### `jouster_gui.ml`
 
-The function `joust_gui` displays an animation of a joust between two bots. The last parameter is the number of seconds between two frames.
+The function `joust_gui` displays an animation of a joust between two bots. The last parameter is the number of seconds between two frames. Syntax: `joust_gui bot1 bot2 arena_size polarity time_between_frames`.
 
 ```ocaml
 # joust_gui bot_MickeyV4_m bot_Bigger_m 25 Norm 0.01;;
@@ -97,7 +97,7 @@ Individuals are now moving randomly on a 100x100 grid. In the first variation, w
 
 After a certain amount of cycles, the simulation can be stopped by stopping any breeding. The size of the population is then forced to decrease, and the last individual alive is the winner of the simulation.
 
-### First variant : standard ecosystem
+### First variant : Standard Ecosystem
 
 (corresponds to the function `ecosystem_std` in `ecosystem.ml`)
 
@@ -113,7 +113,7 @@ Two special rules can be temporarily be applied in specific cases: if the popula
 
 After a fixed number of cycles, 
 
-### Second variant : death match ecosystem
+### Second variant: Death match Ecosystem
 
 (corresponds to the function `ecosystem_dm` in `ecosystem.ml`)
 
