@@ -188,7 +188,7 @@ let rev_pol_bot str_bot =
     done ; copy
 
 
-let joust_gui bot1 bot2 size pol secs =
+let joust_gui bot1 bot2 size pol secs = trace_winner (
     let bot2 = rev_bot (if pol = Inv then rev_pol_bot bot2 else bot2) in
     let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
     let len1, len2 = String.length bot1, String.length bot2 in
@@ -229,7 +229,7 @@ let joust_gui bot1 bot2 size pol secs =
                                 else if (zz1 && z1) || (p1 < 0) || (p1 = size) then (-1)
                                 else if (zz2 && z2) || (p2 < 0) || (p2 = size) then 1
                                 else fight (cycle + 1) p1 p2 i1 i2 l1 l2 zz1 zz2)
-    in fight 0 0 (size -1) 0 0 [] [] false false
+    in fight 0 0 (size -1) 0 0 [] [] false false )
 
 
 let all_battles_gui bot1 bot2 secs =
