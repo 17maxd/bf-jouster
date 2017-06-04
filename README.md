@@ -3,8 +3,6 @@
 
 This project aims to obtain an almost unbeatable robot at Bf Joust (see [Esolang - BF Joust](https://esolangs.org/wiki/BF_Joust)).
 
-*Note : This Bf Joust implementation differs slightly from the original one: when a bf program reaches its end, it starts over again.*
-
 For this we will implement a standard genetic algorithm, then two variations: an ecosystem simulation and a parallel evolution strategy.
 
 Those can be directly loaded in `utop`  by launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
@@ -44,7 +42,7 @@ Each bot starts at his own flag, which is cell [0] from his own perspective. The
 left bot                                      right bot
 ```
 
-Both bots execute their action simultaneously, this is considered one cycle. The game ends after 2000 cycles or as soon as one of the winning conditions is reached. If one of the programs reaches its end, it starts over again.
+Both bots execute their action simultaneously, this is considered one cycle. The game ends after 10000 cycles or as soon as one of the winning conditions is reached. If one of the programs reaches its end, it simply stops doing anthing until the end of the game, but can still win.
 
 ### Winning conditions
 

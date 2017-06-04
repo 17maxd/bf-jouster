@@ -189,47 +189,47 @@ let rev_pol_bot str_bot =
 
 
 let joust_gui bot1 bot2 size pol secs =
-    trace_winner (
     let bot2 = rev_bot (if pol = Inv then rev_pol_bot bot2 else bot2) in
     let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
     let len1, len2 = String.length bot1, String.length bot2 in
     trace_instant mem 0 (size - 1) ; pause 0.5 ;
     let exec bot p i l = match bot.[i] with
-        | '>' -> (p + 1, i + 1, l)
-        | '<' -> (p - 1, i + 1, l)
+        | '>' -> (p+1, i+1, l)
+        | '<' -> (p-1, i+1, l)
         | '+' -> (if mem.(p) = 128 then mem.(p) <- (-127)
                   else mem.(p) <- mem.(p) + 1 ; (p, i+1, l))
         | '-' -> (if mem.(p) = (- 127) then mem.(p) <- 128
-                  else mem.(p) <- mem.(p) - 1 ; (p, i + 1, l))
-        | '.' -> (p, i + 1, l)
+                  else mem.(p) <- mem.(p) - 1 ; (p, i+1, l))
+        | '.' -> (p, i+1, l)
         | '[' -> if mem.(p) = 0 then (p, 1 + (jump bot i 0), l)
-                 else (p, i + 1, (i+1)::l)
-        | ']' -> if mem.(p) = 0 then (p, i + 1, (tl l))
+                 else (p, i+1, (i+1)::l)
+        | ']' -> if mem.(p) = 0 then (p, i+1, (tl l))
                  else (p, (hd l), l)
-        |  _  -> (p, i + 1, l)
+        |  _  -> (p, i+1, l)
     in let rec fight cycle p1 p2 i1 i2 l1 l2 z1 z2 =
-        if cycle > 5000 then
+        if (cycle > 5000) || (i1 >= len1 && i2 >= len2) then
             let delta = (abs mem.(0) - abs mem.(size - 1)) in
             if delta > 0 then 1 else if delta < 0 then -1 else 0
         else
-            let mem_i, p1_i = Array.copy mem, p1 in
-            let (p1, i1, l1) = exec bot1 p1 (if i1 >= len1 then 0 else i1) l1 in
-                trace_variation mem_i mem p1_i p1 p2 p2 ;
-            let mem_i, p2_i = Array.copy mem, p2 in
-            let (p2, i2, l2) = exec bot2 p2 (if i2 >= len2 then 0 else i2) l2 in
-                trace_variation mem_i mem p1 p1 p2_i p2 ;
-                pause secs ;
-        let zz1, zz2 = (mem.(0) = 0), (mem.(size - 1) = 0) in
-        if (zz1 && z1) || (zz2 && z2) || p1 < 0 || p2 < 0 || p1 = size || p2 = size then
-            begin
-                if (zz1 && z1) && (zz2 && z2) then 0 else
-                if (abs (p1 - p2)) = (size + 1) then 0 else
-                if (zz1 && z1) || (p1 < 0) || (p1 = size) then (-1)
-                else 1
-            end
-        else fight (cycle + 1) p1 p2 i1 i2 l1 l2 (mem.(0) = 0) (mem.(size-1) = 0)
+            let (p1, i1, l1) =
+                if i1 >= len1 then (p1, i1, l1)
+                else let mem_i, p1_i = Array.copy mem, p1 in
+                     let (p1, i1, l1) = exec bot1 p1 i1 l1 in
+                     trace_variation mem_i mem p1_i p1 p2 p2 ; pause secs ;
+                     (p1, i1, l1) in
+            let (p2, i2, l2) =
+                if i2 >= len2 then (p2, i2, l2)
+                else let mem_i, p2_i = Array.copy mem, p2 in
+                     let (p2, i2, l2) = exec bot2 p2 i2 l2 in
+                     trace_variation mem_i mem p1 p1 p2_i p2 ; pause secs ;
+                     (p2, i2, l2) in
+            let zz1, zz2 = (mem.(0) = 0), (mem.(size - 1) = 0) in
+                (if (zz1 && z1) && (zz2 && z2) then 0
+                                else if abs (p1 - p2) > size then 0
+                                else if (zz1 && z1) || (p1 < 0) || (p1 = size) then (-1)
+                                else if (zz2 && z2) || (p2 < 0) || (p2 = size) then 1
+                                else fight (cycle + 1) p1 p2 i1 i2 l1 l2 zz1 zz2)
     in fight 0 0 (size -1) 0 0 [] [] false false
-    )
 
 
 let all_battles_gui bot1 bot2 secs =
