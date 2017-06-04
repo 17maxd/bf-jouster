@@ -154,7 +154,8 @@ let rec mutate_bot bot mut_prob =
         | t :: t' :: q -> (
             if rand () > mut_prob then t::(aux (t'::q))
             else match rand_mutation () with
-                    | Insert -> t :: (rand_instr_std ()) :: (aux (t'::q))
+                    | Insert -> if length bot > 80 then t::t'::q else
+                                t :: (rand_instr_std ()) :: (aux (t'::q))
                     | Delete -> aux (t'::q)
                     | Permut -> t'::t::(aux q)
             )
@@ -191,7 +192,7 @@ let rec last_n n list =
     last_n n (tl list)
 
 
-(** mating two bots, giving a child having the same length as bot2 *)
+(** mating two bots, len(child) \in [len(1), len(2)] *)
 let mate_bot bot1 bot2 =
     let pos1 = Random.int (List.length bot1) in
     let pos2 = max ((List.length bot2) - pos1) 0 in
