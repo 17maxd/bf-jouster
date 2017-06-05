@@ -93,7 +93,7 @@ let score bot1 bot2 size pol =
     | (Right, Exit,  _, _) -> -20
 
 
-(* let fitness bot =
+    let fitness bot =
     let bot_s = sob bot in
    ((score bot_s objective_bot 11 Norm) +
     (score bot_s objective_bot 21 Norm) +
@@ -104,9 +104,11 @@ let score bot1 bot2 size pol =
     (score bot_s objective_bot 17 Inv ) +
     (score bot_s objective_bot 20 Inv ) +
     (score bot_s objective_bot 25 Inv ) +
-    (score bot_s objective_bot 29 Inv )) / 10 *)
+    (score bot_s objective_bot 29 Inv )) / 10
 
-let fitness bot = score (sob bot) objective_bot 30 Norm
+
+(* faster fitness function for debug purposes *)
+(* let fitness bot = score (sob bot) objective_bot 30 Norm *)
     
     
     
