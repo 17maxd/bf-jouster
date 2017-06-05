@@ -204,4 +204,4 @@ let speedtest bot1 bot2 =
         ignore (bot1 *> bot2)
     done ;
     let cps = iof (foi 840 /. (Sys.time () -. t)) in
-    Printf.printf "%d fights per seconds!\n" cps
+    Printf.printf "%d fights per second!\n" cps

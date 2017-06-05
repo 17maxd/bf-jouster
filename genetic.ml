@@ -233,7 +233,7 @@ let best_n n pop =
         then first_n n sorted_pop
         else first_n n (sorted_pop @ (rand_pop n))
 
-(** the next generation os obtained by: :
+(** the next generation is obtained by: :
         1. Selecting the top 13 bots
         2. Mating all possible couples from those 13 bots
         3. Mutating the obtained childs plus their parents
