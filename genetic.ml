@@ -292,5 +292,5 @@ let evolution_silent nb_gen mut_prob =
 
 let multiple_evolutions n nb_gen mut_prob =
     for i = 0 to n do
-        evolution_silent nb_gen mut_prob
+        evolution_quiet nb_gen mut_prob
     done
