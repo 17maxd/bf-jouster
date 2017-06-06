@@ -194,14 +194,15 @@ let rec last_n n list =
     last_n n (tl list)
 
 
-(** mating two bots, len(child) \in [len(1), len(2)] *)
-let mate_bot bot1 bot2 =
-    let pos1 = Random.int (List.length bot1) in
-    let pos2 = max ((List.length bot2) - pos1) 0 in
-    if Random.bool () then
-         (first_n pos1 bot1) @ (last_n pos2 bot2)
-    else (first_n pos2 bot2) @ (last_n pos1 bot1) 
-
+(** mating two bots, len(child) aproximately in [len(1), len(2)] *)
+let rec mate_bot bot1 bot2 =
+    let l1, l2 = length bot1, length bot2 in
+    if l1 <= l2 then
+        let p1 = Random.int (l1 / 2) in
+        let p2 = Random.int ((l2 - p1) / 2) in
+        (first_n p1 bot1) @ (last_n p2 bot2)
+    else
+        mate_bot bot2 bot1
 
 let mate ind1 ind2 =
     let child = mate_bot ind1.code ind2.code in
