@@ -216,7 +216,7 @@ let rec mate_pop = function
 
 
 
-(* 5. STABDARD GENETIC ALGRITHM *)
+(* 5. STANDARD GENETIC ALGORITHM *)
 
 (** which is the best? the higher fitness, and if equal the shortest bot. *)
 let compare ind1 ind2 =

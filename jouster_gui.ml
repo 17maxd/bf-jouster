@@ -6,7 +6,7 @@
 
 
 
-(** APPELS GRAPHIQUES **)
+(** GRAPHICS **)
 
 #load "graphics.cma" ;;
 
