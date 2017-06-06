@@ -5,10 +5,10 @@ This project aims to obtain an almost unbeatable robot at Bf Joust (see [Esolang
 
 For this we will implement a standard genetic algorithm, then two variations: an ecosystem simulation and a parallel evolution strategy.
 
-Those can be directly loaded in `utop`  by launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
+Those can be directly loaded in utop (or ocaml-top)  by launching respectively `utop -init utop_G.ml`, `utop -init utop_E.ml`, or `utop -init utop_P.ml` 
 
 
-## 0. Bf Jousting (`jouster.ml` and `jouster_gui.ml`)
+## I. Bf Jousting (`jouster.ml` and `jouster_gui.ml`)
 
 (Game descrion from [codegolf](https://codegolf.stackexchange.com/questions/36645/brainfedbotsforbattling-a-brainf-tournament)).
 
@@ -52,7 +52,11 @@ A bot wins under one of the following conditions:
 - The enemy moves his pointer out of the tape (executes > on your flag or < on his own)
 - Its flag's value is more far away from 0 than the value of his opponent's flag after 2000 cycles.
 
-### `jouster.ml`
+---
+
+## II. Bf-joust implementation
+
+### File: `jouster.ml`
 
 The function `joust` file computes the issue of a fight between two bots, on a given arena size and polarity. Syntax: `joust bot1 bot2 arena_size polarity`.
 
@@ -71,7 +75,7 @@ Score : 8
 - : unit = ()
 ```
 
-### `jouster_gui.ml`
+### File: `jouster_gui.ml`
 
 The function `joust_gui` displays an animation of a joust between two bots. The last parameter is the number of seconds between two frames. Syntax: `joust_gui bot1 bot2 arena_size polarity time_between_frames`.
 
@@ -82,12 +86,13 @@ The function `joust_gui` displays an animation of a joust between two bots. The 
 ![joust_gui](/images/joust_gui.gif)
 
 
+## III. Genetic algorithms
 
-## 1. Standard genetic algorithm (`genetic.ml`)
+### 1. Standard genetic algorithm (`genetic.ml`)
 
 (yet to come...)
 
-## 2 Ecosystem simulation (`ecosystem.ml`)
+### 2. Ecosystem simulation (`ecosystem.ml`)
 
 An ecosystem simulation is a more realistic variation of genetic algorithms. Instead of killing all individuals at the end of a cycle, the individuals die either of great age or by being killed during a joust.
 
@@ -95,7 +100,7 @@ Individuals are now moving randomly on a 100x100 grid. In the first variation, w
 
 After a certain amount of cycles, the simulation can be stopped by stopping any breeding. The size of the population is then forced to decrease, and the last individual alive is the winner of the simulation.
 
-### First variant : Standard Ecosystem
+#### A. Standard Ecosystem
 
 (corresponds to the function `ecosystem_std` in `ecosystem.ml`)
 
@@ -111,7 +116,7 @@ Two special rules can be temporarily be applied in specific cases: if the popula
 
 After a fixed number of cycles, 
 
-### Second variant: Death match Ecosystem
+#### B. Death match Ecosystem
 
 (corresponds to the function `ecosystem_dm` in `ecosystem.ml`)
 
@@ -126,6 +131,6 @@ The following rules determine the simulation:
 
 Two special rules can be temporarily be applied in specific cases: if the population gets too low (below 80), an encounter ends up in a fight. If the population gets too high (over 120), a meeting is necessarily a breeding.
 
-## 3. Parallel evolution (`parallel.ml`)
+### 3. Parallel evolution (`parallel.ml`)
 
 (yet to come...)
