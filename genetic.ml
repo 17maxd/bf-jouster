@@ -93,7 +93,7 @@ let score bot1 bot2 size pol =
     | (Right, Exit,  _, _) -> -20
 
 
-    let fitness bot =
+let fitness bot =
     let bot_s = sob bot in
    ((score bot_s objective_bot 11 Norm) +
     (score bot_s objective_bot 21 Norm) +
@@ -251,7 +251,7 @@ let evolution nb_gen mut_prob =
     for i = 0 to nb_gen do
         let best = hd (best_n 1 !pop) in
         let fit, code = best.fit, (sob best.code) in
-        Printf.printf "Generation n°%d (f:%d) : %s\n" i fit code ;
+        Printf.printf "Generation n°%d (f:%d) : %s" i fit code ;
         print_newline () ;
         pop := next_generation !pop mut_prob
     done ;
@@ -290,9 +290,7 @@ let evolution_silent nb_gen mut_prob =
     result *>> objective_bot
 
 
-(** run this, have a break, then admire the results ! *)
-let evolve () =
-    for i = 0 to 20 do
-        evolution_silent 200 0.1 ;
-        p_n ()
+let multiple_evolutions n nb_gen mut_prob =
+    for i = 0 to n do
+        evolution_silent nb_gen mut_prob
     done
