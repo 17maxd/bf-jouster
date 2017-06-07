@@ -6,8 +6,6 @@
 
 
 
-open Jouster
-
 (* TYPES *)
 
 type bot = instr list
