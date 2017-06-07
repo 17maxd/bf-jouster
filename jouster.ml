@@ -166,5 +166,6 @@ let speedtest bot1 bot2 =
     for i = 1 to 20 do
         ignore (bot1 *> bot2)
     done ;
-    let fights_par_sec = iof (foi 840 /. (Sys.time () -. t)) in
+    let delta_t = Sys.time () -. t) in
+    let fights_par_sec = iof (840. /. delta_t) in
     Printf.printf "%d fights per second!\n" fights_par_sec
