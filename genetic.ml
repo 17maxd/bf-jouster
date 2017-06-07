@@ -222,7 +222,7 @@ let rec mate_pop = function
 let compare ind1 ind2 =
     if ind1 = ind2 then 0 else
         if ind2.fit = ind1.fit
-        then length ind2.code - length ind1.code
+        then length ind1.code - length ind2.code
     else ind2.fit - ind1.fit
 
 
