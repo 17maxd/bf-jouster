@@ -6,6 +6,8 @@
 
 
 
+open Jouster
+
 (* TYPES *)
 
 type bot = instr list
@@ -194,15 +196,12 @@ let rec last_n n list =
     last_n n (tl list)
 
 
-(** mating two bots, len(child) aproximately in [len(1), len(2)] *)
+(** mating two bots, len(child) small *)
 let rec mate_bot bot1 bot2 =
     let l1, l2 = length bot1, length bot2 in
-    if l1 <= l2 then
-        let p1 = Random.int (l1 / 2) in
-        let p2 = Random.int ((l2 - p1) / 2) in
-        (first_n p1 bot1) @ (last_n p2 bot2)
-    else
-        mate_bot bot2 bot1
+    let p1 = Random.int (max 10 l1) in
+    let p2 = Random.int (max 10 l2) in
+    (first_n p1 bot1) @ (last_n p2 bot2)
 
 let mate ind1 ind2 =
     let child = mate_bot ind1.code ind2.code in
@@ -295,3 +294,7 @@ let multiple_evolutions n nb_gen mut_prob =
     for i = 0 to n do
         evolution_quiet nb_gen mut_prob
     done
+
+;;
+speedtest bot_MickeyV4_m bot_Bigger_m ;;
+print_newline() ;;
