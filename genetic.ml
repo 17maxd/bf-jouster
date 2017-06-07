@@ -197,8 +197,8 @@ let rec last_n n list =
 (** mating two bots, len(child) small *)
 let rec mate_bot bot1 bot2 =
     let l1, l2 = length bot1, length bot2 in
-    let p1 = Random.int (max 10 l1) in
-    let p2 = Random.int (max 10 l2) in
+    let p1 = Random.int (min 10 l1) in
+    let p2 = Random.int (min 10 l2) in
     (first_n p1 bot1) @ (last_n p2 bot2)
 
 let mate ind1 ind2 =
@@ -292,7 +292,3 @@ let multiple_evolutions n nb_gen mut_prob =
     for i = 0 to n do
         evolution_quiet nb_gen mut_prob
     done
-
-;;
-speedtest bot_MickeyV4_m bot_Bigger_m ;;
-print_newline() ;;
