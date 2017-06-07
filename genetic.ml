@@ -194,12 +194,15 @@ let rec last_n n list =
     last_n n (tl list)
 
 
-(** mating two bots, len(child) small *)
+(** mating two bots, len(child) in [len(1), len(2)] *)
 let rec mate_bot bot1 bot2 =
     let l1, l2 = length bot1, length bot2 in
-    let p1 = Random.int (min 10 l1) in
-    let p2 = Random.int (min 10 l2) in
-    (first_n p1 bot1) @ (last_n p2 bot2)
+    if l2 >= l1 then
+        let p1 = Random.int l1 in
+        let p2 = Random.int (l2 - p1) in
+        (first_n p1 bot1) @ (last_n p2 bot2)
+    else
+        mate_bot bot2 bot1
 
 let mate ind1 ind2 =
     let child = mate_bot ind1.code ind2.code in
@@ -219,7 +222,7 @@ let rec mate_pop = function
 let compare ind1 ind2 =
     if ind1 = ind2 then 0 else
         if ind2.fit = ind1.fit
-        then length ind1.code - length ind2.code
+        then length ind2.code - length ind1.code
     else ind2.fit - ind1.fit
 
 
