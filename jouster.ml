@@ -96,43 +96,6 @@ let joust bot1 bot2 size pol =
         |  _  -> (p, i+1, l)
     in let rec fight cycle p1 p2 i1 i2 l1 l2 z1 z2 =
         let delta = (abs mem.(0) - abs mem.(size - 1)) in
-        if cycle > 2000 then
-            let gagnant = if delta > 0 then Left else
-                          if delta < 0 then Right else Tie in
-            (gagnant, Timeout, delta, cycle)
-        else
-            let (p1, i1, l1) = exec bot1 p1 (if i1 >= len1 then 0 else i1) l1 in
-            let (p2, i2, l2) = exec bot2 p2 (if i2 >= len2 then 0 else i2) l2 in
-            let zz1, zz2 = (mem.(0) = 0), (mem.(size - 1) = 0) in
-            if (zz1 && z1) && (zz2 && z2) then (Tie, Capture, 0, cycle) else
-            if (abs (p1 - p2)) = (size + 1) then (Tie, Exit, 0, cycle) else
-            if (zz1 && z1) then (Right, Capture, delta, cycle) else
-            if (zz2 && z2) then (Left, Capture, delta, cycle) else
-            if (p1 < 0) || (p1 = size) then (Right, Exit, delta, cycle) else
-            if (p2 < 0) || (p2 = size) then (Left, Exit, delta, cycle) else
-            fight (cycle + 1) p1 p2 i1 i2 l1 l2 (mem.(0) = 0) (mem.(size-1) = 0)
-    in fight 0 0 (size -1) 0 0 [] [] false false
-
-
-let joust bot1 bot2 size pol =
-    let bot2 = rev_bot (if pol = Inv then rev_pol_bot bot2 else bot2) in
-    let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
-    let len1, len2 = String.length bot1, String.length bot2 in
-    let exec bot p i l = match bot.[i] with
-        | '>' -> (p+1, i+1, l)
-        | '<' -> (p-1, i+1, l)
-        | '+' -> (if mem.(p) = 128 then mem.(p) <- (-127)
-                  else mem.(p) <- mem.(p) + 1 ; (p, i+1, l))
-        | '-' -> (if mem.(p) = (- 127) then mem.(p) <- 128
-                  else mem.(p) <- mem.(p) - 1 ; (p, i+1, l))
-        | '.' -> (p, i+1, l)
-        | '[' -> if mem.(p) = 0 then (p, 1 + (jump bot i 0), l)
-                 else (p, i+1, (i+1)::l)
-        | ']' -> if mem.(p) = 0 then (p, i+1, (tl l))
-                 else (p, (hd l), l)
-        |  _  -> (p, i+1, l)
-    in let rec fight cycle p1 p2 i1 i2 l1 l2 z1 z2 =
-        let delta = (abs mem.(0) - abs mem.(size - 1)) in
         if cycle > 2000 || (i1 >= len1 && i2 >= len2) then
             let gagnant = if delta > 0 then Left else
                           if delta < 0 then Right else Tie in
