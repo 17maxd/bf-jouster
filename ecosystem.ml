@@ -6,6 +6,8 @@
 
 
 
+open Jouster
+
 (** GRAPHICS **)
 
 #load "graphics.cma" ;;

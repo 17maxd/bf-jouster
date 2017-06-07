@@ -6,6 +6,8 @@
 
 
 
+open Jouster
+
 (* TYPES *)
 
 type bot = instr list
@@ -295,3 +297,7 @@ let multiple_evolutions n nb_gen mut_prob =
     for i = 0 to n do
         evolution_quiet nb_gen mut_prob
     done
+
+;;
+speedtest bot_MickeyV4_m bot_Bigger_m ;;
+print_newline() ;;
