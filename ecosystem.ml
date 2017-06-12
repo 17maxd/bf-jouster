@@ -9,10 +9,8 @@
 (** GRAPHICS **)
 
 #load "graphics.cma" ;;
-
 open Graphics ;;
 Graphics.open_graph "" ;;
-Graphics.set_window_title "BrainF*ck Bots Battle!" ;;
 
 
 
@@ -24,13 +22,54 @@ and instr = | P | M | L | R | W
 
 type polarity = Norm | Inv
 
-type mutation = Insert | Delete | Permut
-
 type joust_issue = Timeout | Capture | Exit
 
 type winner = Left | Tie | Right
 
-type individual = { x : int ; y : int ; life : int ; code : bot }
+type individual = { x : int ; y : int ; fit : int ; life : int ; code : bot }
+
+
+
+(** TRACE **)
+
+let dark = rgb 39 40 34 ;;
+let lighter_gray = rgb 200 200 200
+
+
+let trace_init () =
+    Graphics.set_window_title "Ecosystem simulation!" ;
+    set_color dark ;
+    fill_rect 0 0 600 500 ;
+    moveto 174 380 ;c
+    set_color white ;
+    set_font "-*-fixed-medium-r-semicondensed--25-*-*-*-*-*-iso8859-1" ;
+    draw_string "Ecosystem Simulation" ;
+    moveto 8 430 ;
+    set_font "9x15" ;
+    set_color lighter_gray ;
+    draw_string "version 1.0" ;
+    let m = 8 in
+    moveto (50-m) (30-m) ;
+    lineto (50-m) (330+m) ;
+    lineto (550+m) (330+m) ;
+    lineto (550+m) (30-m) ;
+    lineto (50-m) (30-m)
+
+
+let clear () =
+    set_color dark ;
+    let m = 8 in
+    fill_rect (50-(m-1)) (30-(m-1)) (500+2*(m-1)) (300+2*(m-1))
+
+
+let trace_ind ind =
+    set_color lighter_gray ;
+    draw_circle (5 * ind.x + 50) (3 * ind.y + 30) (max 2 (ind.life / 50))
+
+
+let rec trace_pop = function
+    | t::q -> (trace_ind t ; trace_pop q)
+    | _ -> ()
 
 
 
@@ -46,6 +85,12 @@ let (@-) = List.nth
 let rec ( **^) str n =
     if n < 1 then ""
     else (str ^ str) **^ (n / 2) ^ if n mod 2 = 0 then "" else str
+
+let pause secs =
+    let t = Sys.time () in
+    while Sys.time () < (t +. secs) do
+        ()
+    done
 
 let p_i = print_int
 let p_s = print_string
@@ -67,7 +112,7 @@ let rec string_of_bot = function
 let sob = string_of_bot
 
 
-(** calculates the length of the string representation of a bot *)
+(** Calculates the length of the string representation of a bot. *)
 let rec length bot =
     let rec aux = function
         | [] -> 0
@@ -80,7 +125,7 @@ let rec length bot =
 (* 1. FITNESS *)
 
 
-(** slightly edited versions of bots found on codegolf,
+(** Slightly edited versions of bots found on codegolf,
     the self flag reduction was removed in order to avoid
     ties being counted as a victory *)
 let bot_MickeyV4_m     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
@@ -88,7 +133,7 @@ let bot_CounterPunch_m = ">------------>>>>>>><------------<++++++++++++<-------
 let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>------------------>++++++++++++++++++" ^ (">[++++++++++++++++++[-][-[+]]][++++++++++++++++++[-][-[+]]]" **^ 21)
 
 
-(** chooses against which bot the algorithm will learn to fight *)
+(** Chooses against which bot the algorithm will learn to fight *)
 let objective_bot = bot_Bigger_m
 
 
@@ -120,6 +165,15 @@ let fitness bot =
 let life_expectancy bot = let x = (fitness bot + 20) in x*x
 
 
+let reduce_life ind =
+    { x = ind.x ; y = ind.y; fit = ind.fit; life = ind.life - 1; code = ind.code }
+
+
+let rec reduce_life_pop = function
+    | t::q -> (reduce_life t) :: (reduce_life_pop q)
+    | _ -> []
+
+
 
 (* 2. RANDOM BOTS GENERATION *)
 
@@ -131,7 +185,7 @@ let rand_instr () = instr_tab.(Random.int 8)
 let rand_instr_std () = instr_std_tab.(Random.int 7)
 
 
-(** creates a random bot with a length around 'len' *)
+(** Creates a random bot with a length around 'len' *)
 let rec rand_bot len max_depth =
     let rec aux i =
         if i = 0 then [] else
@@ -144,7 +198,12 @@ let rec rand_bot len max_depth =
 
 let rec rand_ind len max_depth =
     let bot = rand_bot len max_depth in
-    {x = Random.int 99; y = Random.int 99; life = life_expectancy bot; code = bot}
+    let fit = fitness bot in
+   {x = Random.int 99;
+    y = Random.int 99;
+    fit = fit;
+    life = (let x = (fit + 20) in x*x);
+    code = bot}
 
 
 let rec rand_pop size = match size with
@@ -153,78 +212,47 @@ let rec rand_pop size = match size with
 
 
 
-(* 3. MUTATIONS *)
+(* 3. MOVING *)
 
-let rand_mutation () = [|Insert ; Delete ; Permut|].(Random.int 3)
-
-
-let rec mutate_bot bot mut_prob =
-    let rec aux = function
-        | Lp l :: q -> Lp (mutate_bot l mut_prob) :: (aux q)
-        | t :: Lp l :: q -> t :: Lp (mutate_bot l mut_prob) :: (aux q)
-        | t :: t' :: q -> (
-            if rand () > mut_prob then t::(aux (t'::q))
-            else match rand_mutation () with
-                    | Insert -> t :: (rand_instr_std ()) :: (aux (t'::q))
-                    | Delete -> aux (t'::q)
-                    | Permut -> t'::t::(aux q)
-            )
-        | x -> x
-    in aux bot
+let rd_int = Random.int
 
 
-let mutate ind mut_prob =
-    let mutant = mutate_bot ind.code mut_prob in
-    {x = ind.x; y = ind.y; life = life_expectancy mutant; code = mutant}
+let move ind =
+    { x = max 0 (min (ind.x - 3 + rd_int 7) 99) ;
+      y = max 0 (min (ind.y - 3 + rd_int 7) 99) ;
+      fit = ind.fit; life = ind.life ; code = ind.code}
 
 
-let rec mutate_pop pop mut_prob = match pop with
-    | t::q -> (mutate t mut_prob) :: (mutate_pop q mut_prob)
+let rec move_pop = function
+    | t::q -> (move t) :: (move_pop q)
     | [] -> []
 
 
 
-(* 4. MOVING *)
+(* 4. BREEDING *)
 
-let move ind =
-    if ind.x = 0  then ind.x <- ind.x + Random.int 3 else
-    if ind.x = 99 then ind.x <- ind.x - Random.int 3 else
-    ind.x <- ind.x + (Random.int 7) - 3 ;
-    if ind.y = 0  then ind.y <- ind.y + Random.int 3 else
-    if ind.y = 99 then ind.y <- ind.y - Random.int 3 else
-    ind.y <- ind.y + (Random.int 7) - 3
-
-
-let rec move_pop = function
-    | t::q -> (move t ; move_pop q)
-    | [] -> ()
-
-
-
-(* 5. BREEDING *)
-
-(** outputs the first n elements from a list.
-    if len(list) > n, outputs the whole list. *)
+(** Outputs the first n elements from a list.
+    If len(list) > n, outputs the whole list. *)
 let rec first_n n list =
     if n <= 0 then [] else
     if n >= List.length list then list else
     (hd list) :: (first_n (n-1) (tl list))
 
 
-(** outputs the last n elements from a list.
-    if len(list) > n, outputs the whole list. *)
+(** Outputs the last n elements from a list.
+    If len(list) > n, outputs the whole list. *)
 let rec last_n n list =
     if n <= 0 then [] else
     if n >= List.length list then list else
     last_n n (tl list)
 
 
-(** mating two bots, len(child) aproximately in [len(1), len(2)] *)
+(** Mates two bots, with len(child) in [len(1), len(2)] *)
 let rec mate_bot bot1 bot2 =
     let l1, l2 = length bot1, length bot2 in
-    if l1 <= l2 then
-        let p1 = Random.int (l1 / 2) in
-        let p2 = Random.int ((l2 - p1) / 2) in
+    if l2 >= l1 then
+        let p1 = Random.int l1 in
+        let p2 = Random.int (l2 - p1) in
         (first_n p1 bot1) @ (last_n p2 bot2)
     else
         mate_bot bot2 bot1
@@ -232,11 +260,73 @@ let rec mate_bot bot1 bot2 =
 
 let mate ind1 ind2 =
     let child = mate_bot ind1.code ind2.code in
-    {x = ind1.x; y = ind1.y; life = life_expectancy enfant; code = enfant}
+    let fit = fitness child in
+   {x = Random.int 99;
+    y = Random.int 99;
+    fit = fit;
+    life = (let x = (fit + 20) in x*x);
+    code = child}
 
 
 
 (* 6. ECOSYSTEM SIMULATION *)
+
+
+(** Selects the n best individuals, removing doubles.
+    If len(pop)<n, random individuals are added to replace the missing ones.
+    The indvidials are sorted according to their fitness, and if equal, the
+    shorter is the better. *)
+let best_n n pop =
+    let compare ind1 ind2 =
+        if ind1 = ind2 then 0 else
+            if ind2.fit = ind1.fit
+            then length ind1.code - length ind2.code
+        else ind2.fit - ind1.fit
+    in let sorted_pop = List.sort_uniq compare pop in
+    if n <= List.length sorted_pop
+        then first_n n sorted_pop
+        else first_n n (sorted_pop @ (rand_pop n))
+
+
+(** Sorts the population by lexicographic order on (x, y) *)
+let sort_pop pop =    
+    let compare ind1 ind2 =
+        if ind1.x = ind2.x
+        then  ind1.x - ind2.x
+        else ind1.x - ind2.x
+    in List.sort compare pop
+
+
+let same_pos ind1 ind2 = (ind1.x = ind2.x) && (ind1.y = ind2.y)
+
+
+(** Moves and Mates the population *)
+let next_generation pop =
+    let rec kill = function
+        | t::q -> (if t.life > 0 then t::(kill q) else kill q)
+        | [] -> []
+    in let rec breed = function
+        | t::t'::q -> (if same_pos t t'
+                        then t :: (mate t t') :: (breed (t'::q))
+                        else t :: (breed (t'::q)))
+        | x -> x
+    in kill (breed (sort_pop (move_pop pop)))
+
+
+let ecosystem nb_gen =
+    let pop = ref (rand_pop 100) in
+    trace_init () ;
+    for i = 0 to nb_gen do
+        clear () ;
+        trace_pop !pop ;
+        pause 0.05 ;
+        pop := next_generation !pop ;
+    done ;
+    let result = sob (hd (best_n 1 !pop)).code in
+    Printf.printf "\nResult: %s\n\n" result ;
+    result *>> objective_bot
+
+
 
 (* 6.1 - Standard ecosystem *)
 

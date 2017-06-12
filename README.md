@@ -114,7 +114,7 @@ The following rules determine the simulation:
 
 Two special rules can be temporarily be applied in specific cases: if the population gets too low (below 80), the bots life stops decreasing. If the population gets too high (over 120), no more childs are created.
 
-After a fixed number of cycles, 
+![ecosystem](/images/ecosystem.png)
 
 #### B. Death match Ecosystem
 

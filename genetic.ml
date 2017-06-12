@@ -57,7 +57,7 @@ let rec string_of_bot = function
 let sob = string_of_bot
 
 
-(** calculates the length of the string representation of a bot *)
+(** Calculates the length of the string representation of a bot *)
 let rec length bot =
     let rec aux = function
         | [] -> 0
@@ -70,7 +70,7 @@ let rec length bot =
 (* 1. FITNESS *)
 
 
-(** slightly edited versions of bots found on codegolf,
+(** Slightly edited versions of bots found on codegolf,
     the self flag reduction was removed in order to avoid
     ties being counted as a victory *)
 let bot_MickeyV4_m     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
@@ -107,10 +107,6 @@ let fitness bot =
     (score bot_s objective_bot 29 Inv )) / 10
 
 
-(* faster fitness function for debug purposes *)
-(* let fitness bot = score (sob bot) objective_bot 30 Norm *)
-    
-    
     
 (* 2. RANDOM BOTS GENERATION *)
 
@@ -122,7 +118,7 @@ let rand_instr () = instr_tab.(Random.int 8)
 let rand_instr_std () = instr_std_tab.(Random.int 7)
 
 
-(** creates a random bot with a length around 'len' *)
+(** Creates a random bot with a length around 'len' *)
 let rec rand_bot len max_depth =
     let rec aux i =
         if i = 0 then [] else
@@ -178,23 +174,23 @@ let rec mutate_pop pop mut_prob = match pop with
 
 (* 4. BREEDING *)
 
-(** outputs the first n elements from a list.
-    if len(list) > n, outputs the whole list. *)
+(** Outputs the first n elements from a list.
+    If len(list) > n, outputs the whole list. *)
 let rec first_n n list =
     if n <= 0 then [] else
     if n >= List.length list then list else
     (hd list) :: (first_n (n-1) (tl list))
 
 
-(** outputs the last n elements from a list.
-    if len(list) > n, outputs the whole list. *)
+(** Outputs the last n elements from a list.
+    If len(list) > n, outputs the whole list. *)
 let rec last_n n list =
     if n <= 0 then [] else
     if n >= List.length list then list else
     last_n n (tl list)
 
 
-(** mating two bots, len(child) in [len(1), len(2)] *)
+(** Mates two bots, with len(child) in [len(1), len(2)] *)
 let rec mate_bot bot1 bot2 =
     let l1, l2 = length bot1, length bot2 in
     if l2 >= l1 then
@@ -218,23 +214,24 @@ let rec mate_pop = function
 
 (* 5. STANDARD GENETIC ALGORITHM *)
 
-(** which is the best? the higher fitness, and if equal the shortest bot. *)
-let compare ind1 ind2 =
-    if ind1 = ind2 then 0 else
-        if ind2.fit = ind1.fit
-        then length ind1.code - length ind2.code
-    else ind2.fit - ind1.fit
 
-
-(** selects the n best individuals, removing doubles. If len(pop)<n, random
-individuals are picked to replace the missing ones *)
+(** Selects the n best individuals, removing doubles.
+    If len(pop)<n, random individuals are added to replace the missing ones.
+    The indvidials are sorted according to their fitness, and if equal, the
+    shorter is the better. *)
 let best_n n pop =
-    let sorted_pop = List.sort_uniq compare pop in
+    let compare ind1 ind2 =
+        if ind1 = ind2 then 0 else
+            if ind2.fit = ind1.fit
+            then length ind1.code - length ind2.code
+        else ind2.fit - ind1.fit
+    in let sorted_pop = List.sort_uniq compare pop in
     if n <= List.length sorted_pop
         then first_n n sorted_pop
         else first_n n (sorted_pop @ (rand_pop n))
 
-(** the next generation is obtained by: :
+
+(** The next generation is obtained by: :
         1. Selecting the top 13 bots
         2. Mating all possible couples from those 13 bots
         3. Mutating the obtained childs plus their parents

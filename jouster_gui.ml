@@ -9,7 +9,6 @@
 (** GRAPHICS **)
 
 #load "graphics.cma" ;;
-
 open Graphics ;;
 Graphics.open_graph "" ;;
 Graphics.set_window_title "BrainF*ck Bots Battle!" ;;
