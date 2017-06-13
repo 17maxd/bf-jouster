@@ -79,7 +79,7 @@ let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>-------
 
 
 (** chooses against which bot the algorithm will learn to fight *)
-let objective_bot = bot_CounterPunch_m
+let objective_bot = bot_Bigger_m
 
 
 let score bot1 bot2 size pol =
@@ -293,6 +293,7 @@ let multiple_evolutions n nb_gen mut_prob =
     for i = 0 to n do
         evolution_quiet nb_gen mut_prob
     done
+
 
 let run () =
     for i = 0 to 50 do evolution_silent 200 0.05 done
