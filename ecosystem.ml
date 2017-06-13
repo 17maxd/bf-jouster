@@ -93,7 +93,7 @@ let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>-------
 
 
 (** Chooses against which bot the algorithm will learn to fight *)
-let objective_bot = bot_MickeyV4_m
+let objective_bot = bot_CounterPunch_m
 
 
 let score bot1 bot2 size pol =
