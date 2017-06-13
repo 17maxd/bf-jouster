@@ -289,7 +289,11 @@ let evolution_silent nb_gen mut_prob =
     result *>> objective_bot
 
 
-let multiple_evolutions n nb_gen mut_prob =
-    for i = 0 to n do
-        evolution_quiet nb_gen mut_prob
-    done
+let run () =
+    let objective_bot = bot_MickeyV4_m in
+    for i = 0 to 20 do evolution_silent 200 0.05 done ;
+    let objective_bot = bot_CounterPunch_m in
+    for i = 0 to 20 do evolution_silent 200 0.05 done ;
+    let objective_bot = bot_Bigger_m in
+    for i = 0 to 20 do evolution_silent 200 0.05 done ;
+    
