@@ -27,6 +27,7 @@ let (-=) a b = (a := (!a - b))
 let (@@) = Array.append
 
 let rec ( *@ ) arr n = if n <= 0 then [||] else arr @@ (arr *@ (n-1)) 
+let rec ( *^ ) str n = if n <= 0 then  ""  else str ^  (str *^ (n-1)) 
 
 let foi = float_of_int
 let iof = int_of_float

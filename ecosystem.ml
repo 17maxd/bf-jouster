@@ -126,7 +126,14 @@ let rec calc_fitness_pop = function
     | [] -> []
 
 
-let life_exp fit = let x = (fit + 22) in (x*x*x)/500
+(** Value : 
+        * 0 if fit < -4
+        * 10 if fit < -2
+        * else 10 + (fit+5)^6 *)
+let life_exp fit =
+    if fit < -4 then 0 else
+    let x = max fit (-4) in
+    let y = (x + 5) in 10 + (y*y*y*y*y*y)/1000
 
 
 let reduce_life ind =
@@ -305,7 +312,7 @@ let magenta = rgb 240 100 240 ;;
 
 
 let trace_init () =
-    Graphics.set_window_title "Ecosystem simulation!" ;
+    Graphics.set_window_title "Ecosystem simulation" ;
     set_color dark ;
     fill_rect 0 0 600 500 ;
     moveto 174 380 ;
@@ -348,8 +355,10 @@ let close_enough ind1 ind2 = (ind1.x = ind2.x)
 
 
 let ecosystem_gui nb_gen mut_prob =
-    let pop = ref (rand_pop 500) in
     trace_init () ;
+    print_string "Initialisation..." ;
+    print_newline () ;
+    let pop = ref (rand_pop 300) in
     let rec kill = function
         | t::q -> (if t.life > 0 then t::(kill q) else kill q)
         | [] -> []
@@ -360,9 +369,10 @@ let ecosystem_gui nb_gen mut_prob =
         | x -> x
     in for i = 0 to nb_gen do
         pop := move_pop !pop ;
-        if (List.length !pop) > 50 then (pop := reduce_life_pop !pop) ;
+        if (List.length !pop) > 80 then (pop := reduce_life_pop !pop) ;
         pop := kill !pop ;
-        if (List.length !pop) < 100 then (pop := breed !pop) ;
+        if (List.length !pop) < 150 then (pop := breed !pop) ;
+        if (List.length !pop) < 50 then (pop := !pop @ rand_pop 100) ;
         pop := mutate_pop !pop mut_prob ;
         if i mod 50 = 0 then begin
             let best = hd (best_n 1 !pop) in

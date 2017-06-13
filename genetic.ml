@@ -79,7 +79,7 @@ let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>-------
 
 
 (** chooses against which bot the algorithm will learn to fight *)
-let objective_bot = bot_Bigger_m
+let objective_bot = bot_MickeyV4_m
 
 
 let score bot1 bot2 size pol =
@@ -167,7 +167,8 @@ let mutate ind mut_prob =
 
 
 let rec mutate_pop pop mut_prob = match pop with
-    | t::q -> (mutate t mut_prob) :: (mutate_pop q mut_prob)
+    | t::q -> (if rand () < mut_prob then (mutate t mut_prob) else t)
+                :: (mutate_pop q mut_prob)
     | [] -> []
 
 
