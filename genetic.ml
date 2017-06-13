@@ -295,4 +295,4 @@ let multiple_evolutions n nb_gen mut_prob =
     done
 
 let run () =
-    for i = 0 to 20 do evolution_silent 200 0.05 done
+    for i = 0 to 50 do evolution_silent 200 0.05 done
