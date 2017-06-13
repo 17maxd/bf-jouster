@@ -78,10 +78,6 @@ let bot_CounterPunch_m = ">------------>>>>>>><------------<++++++++++++<-------
 let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>------------------>++++++++++++++++++" ^ (">[++++++++++++++++++[-][-[+]]][++++++++++++++++++[-][-[+]]]" **^ 21)
 
 
-(** chooses against which bot the algorithm will learn to fight *)
-let objective_bot = bot_MickeyV4_m
-
-
 let score bot1 bot2 size pol =
     match joust bot1 bot2 size pol with
     | (Tie, _, _, _) -> 0
@@ -95,16 +91,16 @@ let score bot1 bot2 size pol =
 
 let fitness bot =
     let bot_s = sob bot in
-   ((score bot_s objective_bot 11 Norm) +
-    (score bot_s objective_bot 21 Norm) +
-    (score bot_s objective_bot 24 Norm) +
-    (score bot_s objective_bot 29 Norm) +
-    (score bot_s objective_bot 30 Norm) +
-    (score bot_s objective_bot 13 Inv ) +
-    (score bot_s objective_bot 17 Inv ) +
-    (score bot_s objective_bot 20 Inv ) +
-    (score bot_s objective_bot 25 Inv ) +
-    (score bot_s objective_bot 29 Inv )) / 10
+   ((score bot_s !objective_bot 11 Norm) +
+    (score bot_s !objective_bot 21 Norm) +
+    (score bot_s !objective_bot 24 Norm) +
+    (score bot_s !objective_bot 29 Norm) +
+    (score bot_s !objective_bot 30 Norm) +
+    (score bot_s !objective_bot 13 Inv ) +
+    (score bot_s !objective_bot 17 Inv ) +
+    (score bot_s !objective_bot 20 Inv ) +
+    (score bot_s !objective_bot 25 Inv ) +
+    (score bot_s !objective_bot 29 Inv )) / 10
 
 
     
@@ -256,7 +252,7 @@ let evolution nb_gen mut_prob =
     done ;
     let result = sob (hd (best_n 1 !pop)).code in
     Printf.printf "\nResult: %s\n\n" result ;
-    result *>> objective_bot
+    result *>> !objective_bot
 
 
 (** same as the previous, displays the current best only every 20 generations *)    
@@ -275,7 +271,7 @@ let evolution_quiet nb_gen mut_prob =
     done ;
     let result = sob (hd (best_n 1 !pop)).code in
     Printf.printf "\nResult: %s\n\n" result ;
-    result *>> objective_bot
+    result *>> !objective_bot
 
 
 (** same as the previous, displays nothing but the final result *)    
@@ -286,14 +282,14 @@ let evolution_silent nb_gen mut_prob =
     done ;
     let result = sob (hd (best_n 1 !pop)).code in
     Printf.printf "\nResult: %s\n\n" result ;
-    result *>> objective_bot
+    result *>> !objective_bot
 
 
 let run () =
-    let objective_bot = bot_MickeyV4_m in
+    let objective_bot = ref bot_MickeyV4_m in
     for i = 0 to 20 do evolution_silent 200 0.05 done ;
-    let objective_bot = bot_CounterPunch_m in
+    let objective_bot = ref bot_CounterPunch_m in
     for i = 0 to 20 do evolution_silent 200 0.05 done ;
-    let objective_bot = bot_Bigger_m in
+    let objective_bot = ref bot_Bigger_m in
     for i = 0 to 20 do evolution_silent 200 0.05 done ;
     
