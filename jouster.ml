@@ -1,42 +1,13 @@
 (*
     File: jouster.ml
-    Version: 3.0
     Author: Max D3
 *)
 
 
 
-(** TYPES **)
-
-type polarity = Norm | Inv
-
-type joust_issue = Timeout | Capture | Exit
-
-type winner = Left | Tie | Right
-
-
-
-(** BASIC FUNCTIONS AND SHORTCUTS **)
-
-let hd = List.hd
-let tl = List.tl
-
-let (+=) a b = (a := (!a + b))
-let (-=) a b = (a := (!a - b))
-
-let (@@) = Array.append
-
-let rec ( *@ ) arr n = if n <= 0 then [||] else arr @@ (arr *@ (n-1)) 
-let rec ( *^ ) str n = if n <= 0 then  ""  else str ^  (str *^ (n-1)) 
-
-let foi = float_of_int
-let iof = int_of_float
-
-
-
 (* BOTS FIGHTS! *)
 
-(** jumps to the matching ']'-bracket after the i-th character in the bot,
+(** Jumps to the matching ']'-bracket after the i-th character in the bot,
     the 'depth' variable allows to avoid sub-loops *)
 let rec jump str_bot i depth = match str_bot.[i] with
     | '[' -> jump str_bot (i+1) (depth+1)
@@ -44,7 +15,7 @@ let rec jump str_bot i depth = match str_bot.[i] with
     |  _  -> jump str_bot (i+1) depth
 
 
-(** returns an inverted copy of the bot *)
+(** Returns an inverted copy of the bot *)
 let rev_bot str_bot =
     let copy = Bytes.copy str_bot in
     let len = String.length(copy) in
@@ -56,7 +27,7 @@ let rev_bot str_bot =
     done ; copy
 
 
-(** returns an polarity-reverted copy of the bot *)
+(** Returns an polarity-reverted copy of the bot *)
 let rev_pol_bot str_bot =
     let copy = Bytes.copy str_bot in
     let len = String.length(copy) in
@@ -68,12 +39,12 @@ let rev_pol_bot str_bot =
     done ; copy
 
 
-(** determines the issue of a joust between bot1 and bot2
-    the joust stops when:
+(** Determines the issue of a joust between bot1 and bot2.
+    The joust ends when:
         - A flag is at zero for two consecutive rounds (Capture)
         - A bot exits the arena (Exit) 
         - More than 2000 cycles without victory
-    the variable 'delta' represents the difference between the bots flags. *)
+    The variable 'delta' represents the difference between the bots flags. *)
 let joust bot1 bot2 size pol =
     let bot2 = rev_bot (if pol = Inv then rev_pol_bot bot2 else bot2) in
     let mem = [|128|] @@ ([|0|] *@ (size - 2)) @@ [|128|] in
@@ -87,7 +58,7 @@ let joust bot1 bot2 size pol =
                   else mem.(p) <- mem.(p) - 1 ; (p, i+1, l))
         | '.' -> (p, i+1, l)
         | '[' -> if mem.(p) = 0 then (p, 1 + (jump bot i 0), l)
-                 else (p, i+1, (i+1)::l)
+                else (p, i+1, (i+1)::l)
         | ']' -> if mem.(p) = 0 then (p, i+1, (tl l))
                  else (p, (hd l), l)
         |  _  -> (p, i+1, l)
@@ -124,7 +95,7 @@ let score_joust bot1 bot2 n pol = match joust bot1 bot2 n pol with
     | (Tie,_,_,_) -> 0
 
 
-(** displays the issue of all possible combats between two bots
+(** Displays the issue of all possible combats between two bots
     1 means win, 0 means tie and -1 means loss *)
 let ( *>> ) bot1 bot2 =
     let pts = ref 0 in
@@ -147,7 +118,8 @@ let ( *>> ) bot1 bot2 =
     print_int !pts ;
     print_newline ()
 
-(** displays only the total of the points from the previous function *)
+
+(** Displays only the sum of the points from the previous function *)
 let ( *> ) bot1 bot2 =
     let pts = ref 0 in
     for i = 10 to 30 do
@@ -159,7 +131,7 @@ let ( *> ) bot1 bot2 =
 
 (** SPEEDTEST **)
 
-(** Speedtest based on 840 fights between two bots *)
+(** Speedtest based on 840 fights between two bots (20*42 possible configs) *)
 let speedtest bot1 bot2 =
     Printf.printf "\nBenchmark..." ;
     print_newline() ;

@@ -1,7 +1,6 @@
 (*
-    File : jouster_gui.ml
-    Version : 3.0
-    Author : max
+    File: jouster_gui.ml
+    Author: Max D3
 *)
 
 
@@ -13,33 +12,6 @@ open Graphics ;;
 Graphics.open_graph "" ;;
 Graphics.set_window_title "BrainF*ck Bots Battle!" ;;
 
-
-
-(** TYPES **)
-
-type polarity = Norm | Inv
-
-
-
-(** BASIC FUNCTIONS AND SHORTCUTS **)
-
-let hd = List.hd
-let tl = List.tl
-
-let (@@) = Array.append
-
-let rec ( *@) arr n = if n <= 0 then [||] else arr @@ (arr *@ (n-1)) 
-let rec ( *^) str n = if n <= 0 then ""   else str  ^ (str *^ (n-1))
-
-let pause secs =
-    let t = Sys.time () in
-    while Sys.time () < (t +. secs) do
-        ()
-    done
-
-
-
-(** GRAPHICS **)
 
 let white = rgb 248 248 242
 let dark = rgb 39 40 34
@@ -66,7 +38,7 @@ let trace_text g =
     draw_string "version 3.0"
 
 
-let traceColumn g pos heigth color =
+let trace_column g pos heigth color =
     set_color color ;
     if heigth > 0 then
         fill_rect (g + 17*pos) 209 15 (heigth - 1)
@@ -74,15 +46,15 @@ let traceColumn g pos heigth color =
         fill_rect (g + 17*pos) (191 + heigth) 15 (-heigth - 1)
 
 
-(* edits the column vith a variation delta \in {-1 , 1} *)
-let editeColumn g pos val_init delta color =
+(* Edits the column vith a variation delta \in {-1 , 1} *)
+let edit_column g pos val_init delta color =
     let g' = g + 17*pos in
     set_color color ;
     if (abs delta) > 2 then
         if delta < 0 then
-        (traceColumn g pos 128 dark ; traceColumn g pos (-127) color)
+        (trace_column g pos 128 dark ; trace_column g pos (-127) color)
         else
-        (traceColumn g pos (-127) dark ; traceColumn g pos 128 color)
+        (trace_column g pos (-127) dark ; trace_column g pos 128 color)
     else if val_init > 0 then
         if delta > 0 then
             fill_rect g' (209 + val_init) 15 0
@@ -93,9 +65,7 @@ let editeColumn g pos val_init delta color =
             fill_rect g' (191 + val_init - 1) 15 0
         else
             (set_color dark ; fill_rect g' (191 + val_init) 15 0)
-    else begin (* cas ou val_init = 0 *)
-        traceColumn g pos delta color
-    end
+    else trace_column g pos delta color
 
 
 let trace_bot g pos color =
@@ -104,7 +74,7 @@ let trace_bot g pos color =
 
 
 let trace_instant mem bot1 bot2 =
-    let g = (600 - ((Array.length mem) * 17)) / 2 in (
+    let g = (600 - ((Array.length mem) * 17)) / 2 in
     clear_graph () ;
     trace_text g ;
     let len = Array.length mem in
@@ -112,24 +82,23 @@ let trace_instant mem bot1 bot2 =
         let color = if i = 0 then light_blue
                     else if i = (len -1) then light_red
                     else white in
-        traceColumn g i mem.(i) color
+        trace_column g i mem.(i) color
     done ;
     if bot1 = bot2 then trace_bot g bot1 magenta
     else (trace_bot g bot1 blue ; trace_bot g bot2 red)
-    )
 
 
-(** bot1 (blue) went from pos bi to bf
-    bot2 (red) went from pos ri to rf *)
+(** bot1 (blue) went from pos b_i to b_f
+    bot2 (red) went from pos r_i to r_f *)
 let trace_variation mem1 mem2 bi bf ri rf =
-    let g = (600 - ((Array.length mem1) * 17)) / 2 in (
+    let g = (600 - ((Array.length mem1) * 17)) / 2 in
     let len = Array.length mem2 in
     for i = 0 to (len -1) do
         if mem1.(i) == mem2.(i) then () else
         let color = if i = 0 then light_blue
                     else if i = (len -1) then light_red
                     else white in
-        editeColumn g i mem1.(i) (mem2.(i) - mem1.(i)) color
+        edit_column g i mem1.(i) (mem2.(i) - mem1.(i)) color
     done ;
     match (bf-bi, rf-ri, bf-rf, bi-ri) with
         | 0,0,_,_ -> ()
@@ -141,7 +110,6 @@ let trace_variation mem1 mem2 bi bf ri rf =
         | _,0,_,_ -> (trace_bot g bi dark ; trace_bot g bf blue)
         | _ ->       (trace_bot g bi dark ; trace_bot g ri dark ;
                       trace_bot g bf blue ; trace_bot g rf red)
-    )
 
 
 let trace_winner id =
@@ -155,7 +123,7 @@ let trace_winner id =
 
 (* BOTS FIGHTS! *)
 
-(** jumps to the matching ']'-bracket after the i-th character in the bot,
+(** Jumps to the matching ']'-bracket after the i-th character in the bot,
     the 'depth' variable allows to avoid sub-loops *)
 let rec jump str_bot i depth = match str_bot.[i] with
     | '[' -> jump str_bot (i+1) (depth+1)
@@ -163,7 +131,7 @@ let rec jump str_bot i depth = match str_bot.[i] with
     |  _  -> jump str_bot (i+1) depth
 
 
-(** returns an inverted copy of the bot *)
+(** Returns an inverted copy of the bot *)
 let rev_bot str_bot =
     let copy = Bytes.copy str_bot in
     let len = String.length(copy) in
@@ -175,7 +143,7 @@ let rev_bot str_bot =
     done ; copy
 
 
-(** returns an polarity-reverted copy of the bot *)
+(** Returns an polarity-reverted copy of the bot *)
 let rev_pol_bot str_bot =
     let copy = Bytes.copy str_bot in
     let len = String.length(copy) in
@@ -223,34 +191,9 @@ let joust_gui bot1 bot2 size pol secs = trace_winner (
                      trace_variation mem_i mem p1 p1 p2_i p2 ; pause secs ;
                      (p2, i2, l2) in
             let zz1, zz2 = (mem.(0) = 0), (mem.(size - 1) = 0) in
-                (if (zz1 && z1) && (zz2 && z2) then 0
-                                else if abs (p1 - p2) > size then 0
-                                else if (zz1 && z1) || (p1 < 0) || (p1 = size) then (-1)
-                                else if (zz2 && z2) || (p2 < 0) || (p2 = size) then 1
-                                else fight (cycle + 1) p1 p2 i1 i2 l1 l2 zz1 zz2)
-    in fight 0 0 (size -1) 0 0 [] [] false false )
-
-
-let all_battles_gui bot1 bot2 secs =
-    for i = 10 to 30 do
-        pause 0.5 ;
-        joust_gui bot1 bot2 i Norm secs ;
-        pause 0.5 ;
-        joust_gui bot1 bot2 i Inv secs ;
-    done
-
-
-
-(** GRAPHIC DEBUG **)
-
-let randrange amplitude = Random.int(2*amplitude + 1) - amplitude
-
-let rec random_mem size amp = if size = 0 then [||]
-    else [|(randrange amp/2)+(randrange amp/2)|] @@ (random_mem (size - 1) amp)
-
-let random_disp () =
-    trace_instant ([|123|] @@ (random_mem 28 50) @@ [|119|]) (Random.int 30) (Random.int 30)
-
-;;
-
-random_disp ()
+                if (zz1 && z1) && (zz2 && z2) then 0
+                else if abs (p1 - p2) > size then 0
+                else if (zz1 && z1) || (p1 < 0) || (p1 = size) then (-1)
+                else if (zz2 && z2) || (p2 < 0) || (p2 = size) then 1
+                else fight (cycle + 1) p1 p2 i1 i2 l1 l2 zz1 zz2
+    in fight 0 0 (size -1) 0 0 [] [] false false)

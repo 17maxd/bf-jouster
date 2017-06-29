@@ -1,6 +1,5 @@
 (*
     File: genetic.ml
-    Version: 2.0
     Author: Max D3
 *)
 
@@ -8,38 +7,7 @@
 
 (* TYPES *)
 
-type bot = instr list
-and instr = | P | M | L | R | W
-            | Lp of instr list
-
-type polarity = Norm | Inv
-
-type mutation = Insert | Delete | Permut
-
-type joust_issue = Timeout | Capture | Exit
-
-type winner = Left | Tie | Right
-
 type individual = { fit : int ; code : bot }
-
-
-
-(** BASIC FUNCTIONS AND SHORTCUTS **)
-
-let (+=) a b = (a := (!a + b))
-let (-=) a b = (a := (!a - b))
-
-let rand () = Random.float 1.0
-
-let (@-) = List.nth
-
-let rec ( **^) str n =
-    if n < 1 then ""
-    else (str ^ str) **^ (n / 2) ^ if n mod 2 = 0 then "" else str
-
-let p_i = print_int
-let p_s = print_string
-let p_n = print_newline
 
 
 
@@ -57,7 +25,7 @@ let rec string_of_bot = function
 let sob = string_of_bot
 
 
-(** Calculates the length of the string representation of a bot *)
+(** Calculates the length of the string representation of a bot. *)
 let rec length bot =
     let rec aux = function
         | [] -> 0
@@ -72,14 +40,14 @@ let rec length bot =
 
 (** Slightly edited versions of bots found on codegolf,
     the self flag reduction was removed in order to avoid
-    ties being counted as a victory *)
+    ties being counted as a victory. *)
 let bot_MickeyV4_m     = ">------>->---<<------>->---->------------->>--->------<----------------<------<-<<--<------------->--------<-->------>------->----------->-------------->-------->------->----------------[>[--[-[+]]]>[--[+]]-]-------[>[--[-[+]]]>[--[+]]-]<--<------>------->----------------[>[--[-[+]]]>[--[+]]-]<--<---------------------->------>->-<-----"
 let bot_CounterPunch_m = ">------------>>>>>>><------------<++++++++++++<------------<++++++++++++<------------<++++++++++++>>>>>>>" ^ ("[-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]][-[------[+.]][------[+.]][------[+.]][------[+.]][------[+.]]]>" **^ 21)
 let bot_Bigger_m       = ">->+>+>->------------------>++++++++++++++++++>------------------>++++++++++++++++++" ^ (">[++++++++++++++++++[-][-[+]]][++++++++++++++++++[-][-[+]]]" **^ 21)
 
 
-(** chooses against which bot the algorithm will learn to fight *)
-let objective_bot = bot_Bigger_m
+(** Chooses against which bot the algorithm will learn to fight. *)
+let objective_bot = bot_MickeyV4_m
 
 
 let score bot1 bot2 size pol =
@@ -94,17 +62,10 @@ let score bot1 bot2 size pol =
 
 
 let fitness bot =
-    let bot_s = sob bot in
-   ((score bot_s objective_bot 11 Norm) +
-    (score bot_s objective_bot 21 Norm) +
-    (score bot_s objective_bot 24 Norm) +
-    (score bot_s objective_bot 29 Norm) +
-    (score bot_s objective_bot 30 Norm) +
-    (score bot_s objective_bot 13 Inv ) +
-    (score bot_s objective_bot 17 Inv ) +
-    (score bot_s objective_bot 20 Inv ) +
-    (score bot_s objective_bot 25 Inv ) +
-    (score bot_s objective_bot 29 Inv )) / 10
+    let points = score (sob bot) objective_bot in
+    ( (points 11 Norm) + (points 21 Norm) + (points 24 Norm) + (points 29 Norm)
+    + (points 30 Norm) + (points 13 Inv ) + (points 17 Inv ) + (points 20 Inv )
+    + (points 25 Inv ) + (points 29 Inv )) / 10
 
 
     
@@ -126,12 +87,12 @@ let rec rand_bot len max_depth =
             | Lp _ -> if max_depth < 0 then aux i else
                       Lp (rand_bot (len/2) (max_depth-1)) :: (aux (i-1))
             | x -> x :: (aux (i-1))
-    in aux (1 + Random.int len)
+    in aux (1 + Random.int (max len 1))
 
 
 let rec rand_ind len max_depth =
     let bot = rand_bot len max_depth in
-    {fit = fitness bot; code = bot}
+    {fit = fitness bot ; code = bot}
 
 
 let rec rand_pop size = match size with
@@ -195,15 +156,15 @@ let rec last_n n list =
 let rec mate_bot bot1 bot2 =
     let l1, l2 = length bot1, length bot2 in
     if l2 >= l1 then
-        let p1 = Random.int l1 in
-        let p2 = Random.int (l2 - p1) in
+        let p1 = Random.int (max l1 1) in
+        let p2 = Random.int (max (l2 - p1) 1) in
         (first_n p1 bot1) @ (last_n p2 bot2)
     else
         mate_bot bot2 bot1
 
 let mate ind1 ind2 =
     let child = mate_bot ind1.code ind2.code in
-    {fit = fitness child; code = child}
+    {fit = fitness child ; code = child}
 
 
 (** mates every possible couple of bots from pop *)
@@ -222,9 +183,8 @@ let rec mate_pop = function
     shorter is the better. *)
 let best_n n pop =
     let compare ind1 ind2 =
-        if ind1 = ind2 then 0 else
-            if ind2.fit = ind1.fit
-            then length ind1.code - length ind2.code
+        if ind2.fit = ind1.fit
+        then length ind1.code - length ind2.code
         else ind2.fit - ind1.fit
     in let sorted_pop = List.sort_uniq compare pop in
     if n <= List.length sorted_pop
@@ -243,6 +203,7 @@ let next_generation pop mut_prob =
     parents @ (mutate_pop (mate_pop parents) mut_prob) @ (rand_pop 9)
 
 
+(* Runs the genetic algorithm *)
 let evolution nb_gen mut_prob =
     Printf.printf "\n%d" (Random.int 10000) ; (* random ID *)
     print_newline () ;
@@ -259,7 +220,7 @@ let evolution nb_gen mut_prob =
     result *>> objective_bot
 
 
-(** same as the previous, displays the current best only every 20 generations *)    
+(** Same as the previous, displays the current best only every 20 generations *)
 let evolution_quiet nb_gen mut_prob =
     Printf.printf "\n%d\n" (Random.int 10000) ; (* random ID *)
     print_newline () ;
@@ -278,7 +239,7 @@ let evolution_quiet nb_gen mut_prob =
     result *>> objective_bot
 
 
-(** same as the previous, displays nothing but the final result *)    
+(** Same as the previous, displays nothing but the final result *)
 let evolution_silent nb_gen mut_prob =
     let pop = ref (rand_pop 100) in
     for i = 0 to nb_gen do
@@ -293,7 +254,3 @@ let multiple_evolutions n nb_gen mut_prob =
     for i = 0 to n do
         evolution_quiet nb_gen mut_prob
     done
-
-
-let run () =
-    for i = 0 to 50 do evolution_silent 200 0.05 done
